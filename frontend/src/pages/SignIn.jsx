@@ -9,7 +9,7 @@ const SignIn = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`https://farmai-backend.onrender.com/api/auth/login`, {
+      const response = await fetch(`https://farmai-backend.onrender.com/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
