@@ -24,10 +24,10 @@ const FertilizerPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/fertilizer", formData);
-      const recommendation = response.data.recommendation;
-
-      navigate("/fertilizer-result", { state: { formData, recommendation } });
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; 
+  const response = await axios.post(`${BACKEND_URL}/fertilizer`, formData);
+  const recommendation = response.data.recommendation;
+  navigate("/fertilizer-result", { state: { recommendation, formData } });
     } catch (err) {
       console.error(err);
       alert("⚠️ Something went wrong. Please try again.");

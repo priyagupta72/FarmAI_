@@ -15,15 +15,17 @@ function Forum() {
   }, []);
 
   const fetchPosts = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/posts");
-      const data = await response.json();
-      setPosts(data);
-    } catch (err) {
-      setError("Failed to fetch posts");
-      console.error(err);
-    }
-  };
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // from .env
+    const response = await fetch(`${BACKEND_URL}/api/posts`);
+    const data = await response.json();
+    setPosts(data);
+  } catch (err) {
+    setError("Failed to fetch posts");
+    console.error(err);
+  }
+};
+
 
   const handlePostSubmit = async (e) => {
     e.preventDefault();
@@ -38,10 +40,11 @@ function Forum() {
     if (file) formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:5000/api/posts", {
-        method: "POST",
-        body: formData,
-      });
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; 
+  const response = await fetch(`${BACKEND_URL}/api/posts`, {
+    method: "POST",
+    body: formData,
+  });
 
       if (!response.ok) throw new Error("Failed to create post");
 
@@ -58,10 +61,11 @@ function Forum() {
   };
 
   const handleDeletePost = async (postId) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
-        method: "DELETE",
-      });
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // from .env
+    const response = await fetch(`${BACKEND_URL}/api/posts/${postId}`, {
+      method: "DELETE",
+    });
 
       if (!response.ok) throw new Error("Failed to delete post");
 
@@ -73,10 +77,11 @@ function Forum() {
   };
 
   const handleLike = async (postId) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
-        method: "PUT",
-      });
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; // from .env
+    const response = await fetch(`${BACKEND_URL}/api/posts/${postId}/like`, {
+      method: "PUT",
+    });
 
       if (!response.ok) throw new Error("Failed to like post");
 
@@ -209,10 +214,11 @@ function Forum() {
                       {post.imageUrl && (
                         <div className="mb-4 rounded-lg overflow-hidden">
                           <img
-                            src={`http://localhost:5000${post.imageUrl}`}
-                            alt="Post"
-                            className="w-full h-48 object-cover"
-                          />
+  src={`${import.meta.env.VITE_BACKEND_URL}${post.imageUrl}`}
+  alt="Post"
+  className="w-full h-48 object-cover"
+/>
+
                         </div>
                       )}
 

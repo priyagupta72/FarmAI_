@@ -313,7 +313,7 @@ import axios from "axios";
 import { FaSearch, FaChevronLeft, FaChevronRight, FaLeaf } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "VITE_BACKEND_URL";
 
 const SEARCH_IMAGES = {
   default: "https://images.unsplash.com/photo-1743257165130-c514b979b91b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE5fHx8ZW58MHx8fHx8",

@@ -187,10 +187,10 @@ const CropPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/crop", formData);
-      const prediction = response.data.recommendation;
-
-      navigate("/crop-result", { state: { prediction, formData } });
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const response = await axios.post(`${BACKEND_URL}/crop`, formData);
+  const prediction = response.data.recommendation;
+  navigate("/crop-result", { state: { prediction, formData } });
     } catch (err) {
       console.error(err);
       alert("⚠️ Something went wrong. Please try again.");
