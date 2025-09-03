@@ -56,11 +56,11 @@ const SignIn = () => {
           </button>
         </form>
         <p style={styles.text}>
-          Don't have an account?{" "}
-          <a href="/register" style={styles.link}>
-            Sign Up
-          </a>
-        </p>
+  Don't have an account?{" "}
+  <Link to="/register" style={styles.link}>
+    Sign Up
+  </Link>
+</p>
       </div>
     </div>
   );
