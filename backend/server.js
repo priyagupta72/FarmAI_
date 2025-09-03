@@ -321,14 +321,23 @@
 
 
 
+
+
+
+
+
+
+
+
+
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import path from "path";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import mongoose from "mongoose";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // ===== Routes =====
 import postRoutes from "./routes/postRoutes.js";
@@ -350,35 +359,21 @@ mongoose
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ===== CORS Middleware =====
-app.use(
-  cors({
-    origin: "https://farmai-2-m5gc.onrender.com", // <-- frontend deployed URL
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+// ===== Middleware =====
+// CORS: allow only your frontend
+app.use(cors({
+  origin: "https://farmai-2-m5gc.onrender.com", // frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
-// Optional: Handle preflight for all routes
-app.options("*", cors());
-
-// ===== Other Middleware =====
 app.use(bodyParser.json());
 app.use(express.static(path.join(process.cwd(), "public")));
 
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        scriptSrc: ["'self'"],
-      },
-    },
-  })
-);
+// Helmet: secure headers
+app.use(helmet({
+  contentSecurityPolicy: false // disable CSP temporarily for production scripts
+}));
 
 // ===== API Routes =====
 app.use("/api", authRoutes);              // login, register
@@ -480,4 +475,4 @@ app.post("/api/crop", async (req, res) => {
 });
 
 // ===== Start Server =====
-app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
