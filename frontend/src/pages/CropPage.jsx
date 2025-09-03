@@ -186,9 +186,10 @@ const CropPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    try {
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-  const response = await axios.post(`${BACKEND_URL}/crop`, formData);
+   try {
+  const BACKEND_URL = "https://farmai-backend.onrender.com";
+  const response = await axios.post(`${BACKEND_URL}/api/crop`, formData);
+
   const prediction = response.data.recommendation;
   navigate("/crop-result", { state: { prediction, formData } });
     } catch (err) {

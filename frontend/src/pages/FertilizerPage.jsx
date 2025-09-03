@@ -24,8 +24,9 @@ const FertilizerPage = () => {
     setLoading(true);
 
     try {
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL; 
-  const response = await axios.post(`${BACKEND_URL}/fertilizer`, formData);
+  const BACKEND_URL = "https://farmai-backend.onrender.com"; 
+  const response = await axios.post(`${BACKEND_URL}/api/fertilizer`, formData);
+
   const recommendation = response.data.recommendation;
   navigate("/fertilizer-result", { state: { recommendation, formData } });
     } catch (err) {
