@@ -792,3 +792,10 @@ app.post("/api/crop", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Serve React build folder
+app.use(express.static(path.join(process.cwd(), "frontend/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(process.cwd(), "frontend/build", "index.html"));
+});
