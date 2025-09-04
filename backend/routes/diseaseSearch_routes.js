@@ -60,7 +60,7 @@ let queryCache = new Map(); // Cache for Gemini API queries
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
-  console.error("❌ Gemini API Key is missing in .env file!");
+  console.error("Gemini API Key is missing in .env file!");
   process.exit(1);
 }
 
@@ -113,7 +113,7 @@ async function fetchCropDiseasesFromGemini(query = "") {
 
     return diseases;
   } catch (error) {
-    console.error("❌ Error fetching from Gemini API:", error.message);
+    console.error("Error fetching from Gemini API:", error.message);
     // Fallback to the preloaded disease data if Gemini API fails
     return cropDiseasesCache;
   }

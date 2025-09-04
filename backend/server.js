@@ -735,7 +735,7 @@ app.post("/api/fertilizer", async (req, res) => {
   try {
     const { nitrogen, phosphorous, pottasium, cropname } = req.body;
     if (!nitrogen || !phosphorous || !pottasium || !cropname)
-      return res.status(400).json({ recommendation: "❌ Missing fields!" });
+      return res.status(400).json({ recommendation: "Missing fields!" });
 
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -754,8 +754,8 @@ app.post("/api/fertilizer", async (req, res) => {
 
     res.json({ recommendation: recommendation.trim() || "No recommendation." });
   } catch (err) {
-    console.error("❌ Fertilizer API error:", err);
-    res.status(500).json({ recommendation: "⚠️ Something went wrong." });
+    console.error("Fertilizer API error:", err);
+    res.status(500).json({ recommendation: "Something went wrong." });
   }
 });
 
@@ -764,7 +764,7 @@ app.post("/api/crop", async (req, res) => {
   try {
     const { nitrogen, phosphorous, pottasium, ph, rainfall } = req.body;
     if (!nitrogen || !phosphorous || !pottasium || !ph || !rainfall)
-      return res.status(400).json({ recommendation: "❌ Missing fields!" });
+      return res.status(400).json({ recommendation: "Missing fields!" });
 
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -783,12 +783,12 @@ app.post("/api/crop", async (req, res) => {
 
     res.json({ recommendation: recommendation.trim() || "No recommendation." });
   } catch (err) {
-    console.error("❌ Crop API error:", err);
-    res.status(500).json({ recommendation: "⚠️ Something went wrong." });
+    console.error("Crop API error:", err);
+    res.status(500).json({ recommendation: "Something went wrong." });
   }
 });
 
 // ===== Start Server =====
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

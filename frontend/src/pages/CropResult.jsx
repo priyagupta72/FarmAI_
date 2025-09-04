@@ -151,9 +151,15 @@
 
 
 
+// 
+
+
+
+
+
 import { useLocation, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
-import { FaLeaf, FaTint, FaSeedling, FaWater } from "react-icons/fa";
+import { FaLeaf, FaSeedling, FaTint, FaWater, FaFilePdf, FaRedo } from "react-icons/fa";
 
 const CropResult = () => {
   const navigate = useNavigate();
@@ -166,15 +172,14 @@ const CropResult = () => {
         <p className="text-red-600 font-semibold text-lg">⚠️ No data found.</p>
         <button
           onClick={() => navigate("/crop")}
-          className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+          className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition flex items-center gap-2"
         >
-          Go Back
+          <FaRedo /> Go Back
         </button>
       </div>
     );
   }
 
-  // Clean prediction to remove unwanted stars
   const cleanPrediction = prediction
     .replace(/[*-]+/g, "")
     .split("\n")
@@ -213,33 +218,32 @@ const CropResult = () => {
         Crop Recommendation
       </h1>
 
-      {/* Two-column layout */}
       <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl">
-        {/* Left: Input Summary */}
+        {/* Input Summary */}
         <div className="flex-1 grid grid-cols-2 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-2 flex flex-col items-center hover:scale-105 transition">
             <FaLeaf className="text-green-600 text-3xl mb-2" />
             <span className="text-gray-700 font-semibold">Nitrogen</span>
             <span className="text-gray-900 text-lg">{formData.nitrogen}</span>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center hover:scale-105 transition">
+          <div className="bg-white rounded-xl shadow-lg p-2 flex flex-col items-center hover:scale-105 transition">
             <FaSeedling className="text-green-600 text-3xl mb-2" />
             <span className="text-gray-700 font-semibold">Phosphorous</span>
             <span className="text-gray-900 text-lg">{formData.phosphorous}</span>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center hover:scale-105 transition">
+          <div className="bg-white rounded-xl shadow-lg p-2 flex flex-col items-center hover:scale-105 transition">
             <FaLeaf className="text-green-600 text-3xl mb-2" />
             <span className="text-gray-700 font-semibold">Potassium</span>
             <span className="text-gray-900 text-lg">{formData.pottasium}</span>
           </div>
-          <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center hover:scale-105 transition">
+          <div className="bg-white rounded-xl shadow-lg p-2 flex flex-col items-center hover:scale-105 transition">
             <FaWater className="text-blue-500 text-3xl mb-2" />
             <span className="text-gray-700 font-semibold">Rainfall (mm)</span>
             <span className="text-gray-900 text-lg">{formData.rainfall}</span>
           </div>
         </div>
 
-        {/* Right: Recommended Crops */}
+        {/* Recommended Crops */}
         <div className="flex-1 bg-green-50 rounded-2xl shadow-lg p-6 hover:scale-105 transition">
           <h2 className="text-2xl font-semibold mb-4 text-green-800">
             Recommended Crops
@@ -256,15 +260,15 @@ const CropResult = () => {
       <div className="flex gap-6 mt-10">
         <button
           onClick={() => navigate("/crop")}
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-2xl font-semibold transition"
+          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-2xl font-semibold transition flex items-center gap-2"
         >
-          Predict Another Crop
+          <FaRedo /> Predict Another Crop
         </button>
         <button
           onClick={handleDownload}
-          className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-2xl font-semibold transition"
+          className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-2xl font-semibold transition flex items-center gap-2"
         >
-          Download PDF
+          <FaFilePdf /> Download PDF
         </button>
       </div>
     </div>
