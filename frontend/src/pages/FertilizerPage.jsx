@@ -107,60 +107,79 @@ const FertilizerPage = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  const BACKEND_URL = "https://farmai-h4bm.onrender.com";
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     const { nitrogen, phosphorous, pottasium, cropname } = formData;
-    if (!nitrogen || !phosphorous || !pottasium || !cropname) {
-      alert("Please fill all fields");
+
+    // ===== Frontend Validation =====
+    if (!nitrogen || !phosphorous || !pottasium || !cropname.trim()) {
+      alert("⚠️ Please fill all fields");
+      return;
+    }
+
+    if (
+      nitrogen < 0 || nitrogen > 100 ||
+      phosphorous < 0 || phosphorous > 100 ||
+      pottasium < 0 || pottasium > 100
+    ) {
+      alert("⚠️ N, P, K values must be between 0 and 100");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Replace with your actual API endpoint
-      const res = await fetch("/api/fertilizer", {
+      const payload = {
+        nitrogen: Number(nitrogen),
+        phosphorous: Number(phosphorous),
+        pottasium: Number(pottasium),
+        cropname: cropname.trim(),
+      };
+
+      const res = await fetch(`${BACKEND_URL}/api/fertilizer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (!data.recommendation) {
-        alert("No recommendation returned from server");
+        alert("⚠️ No recommendation returned from server");
         setLoading(false);
         return;
       }
 
-      // Save in localStorage for direct access fallback
+      // Save in localStorage as fallback
       localStorage.setItem(
         "fertilizerData",
-        JSON.stringify({ formData, recommendation: data.recommendation })
+        JSON.stringify({ formData: payload, recommendation: data.recommendation })
       );
 
-      // Navigate to result page with state
+      // Navigate to result page
       navigate("/fertilizer-result", {
-        state: { formData, recommendation: data.recommendation },
+        state: { formData: payload, recommendation: data.recommendation },
       });
     } catch (error) {
       console.error(error);
-      alert("Error fetching recommendation");
+      alert("⚠️ Error fetching recommendation. Check console for details.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
-      <h1 className="text-3xl font-bold text-green-700 mb-8">
-        Fertilizer Prediction
-      </h1>
+      <h1 className="text-3xl font-bold text-green-700 mb-8">Fertilizer Prediction</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
         <input
           type="number"
           name="nitrogen"
@@ -193,17 +212,17 @@ const FertilizerPage = () => {
           onChange={handleChange}
           className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
         />
-      </div>
 
-      <button
-        onClick={handleSubmit}
-        disabled={loading}
-        className={`mt-8 w-40 py-2 rounded-2xl font-semibold text-white ${
-          loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-        } transition`}
-      >
-        {loading ? "Predicting..." : "Predict"}
-      </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className={`mt-6 md:col-span-2 w-full py-3 rounded-2xl font-semibold text-white ${
+            loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+          } transition`}
+        >
+          {loading ? "Predicting..." : "Predict"}
+        </button>
+      </form>
     </div>
   );
 };

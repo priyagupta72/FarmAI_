@@ -222,7 +222,7 @@ const CropPage = () => {
     setLoading(true);
 
     try {
-      const BACKEND_URL = "https://farmai-h4bm.onrender.com"; // Correct backend URL
+      const BACKEND_URL = "https://farmai-h4bm.onrender.com"; 
       const payload = {
         nitrogen: Number(nitrogen),
         phosphorous: Number(phosphorous),
@@ -303,7 +303,7 @@ const CropPage = () => {
           type="submit"
           className="mt-6 w-full bg-green-600 text-white py-3 rounded-xl font-semibold shadow-md hover:bg-green-700 hover:shadow-lg transition duration-200 flex items-center justify-center gap-2"
         >
-          {loading ? "🌿 Analyzing..." : <>Predict <FaRocket /></>}
+          {loading ? "Analyzing..." : <>Predict <FaRocket /></>}
         </motion.button>
       </motion.form>
     </div>

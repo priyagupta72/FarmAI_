@@ -250,7 +250,7 @@
 
 import { useLocation, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
-import { FaLeaf, FaSeedling, FaFlask, FaCheckCircle } from "react-icons/fa";
+import { FaLeaf, FaSeedling, FaFlask, FaCheckCircle, FaRedo, FaFilePdf } from "react-icons/fa";
 import { useEffect, useState } from "react";
 
 const FertilizerResult = () => {
@@ -276,9 +276,9 @@ const FertilizerResult = () => {
         <p className="text-red-600 font-semibold text-lg">⚠️ No data found.</p>
         <button
           onClick={() => navigate("/fertilizer")}
-          className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
+          className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition flex items-center gap-2"
         >
-          Go Back
+          <FaRedo /> Go Back
         </button>
       </div>
     );
@@ -290,13 +290,9 @@ const FertilizerResult = () => {
     const lines = text.includes("\n") ? text.split("\n") : text.split(". ");
     lines.forEach((line) => {
       const lower = line.toLowerCase();
-      if (lower.includes("fertilizer:") || lower.includes("fertilizer name:")) {
-        data.name = line.split(":")[1]?.trim() || line.trim();
-      } else if (lower.includes("dosage:") || lower.includes("apply")) {
-        data.dosage = line.split(":")[1]?.trim() || line.trim();
-      } else if (lower.includes("instructions:") || lower.includes("apply")) {
-        data.instructions = line.split(":")[1]?.trim() || line.trim();
-      }
+      if (lower.includes("fertilizer:")) data.name = line.split(":")[1]?.trim() || line.trim();
+      else if (lower.includes("dosage:")) data.dosage = line.split(":")[1]?.trim() || line.trim();
+      else if (lower.includes("instructions:")) data.instructions = line.split(":")[1]?.trim() || line.trim();
     });
     return data;
   };
@@ -336,7 +332,7 @@ const FertilizerResult = () => {
       </h1>
 
       <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl">
-        {/* Left: Input Summary */}
+        {/* Input Summary */}
         <div className="flex-1 grid grid-cols-2 gap-6">
           <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center hover:scale-105 transition">
             <FaLeaf className="text-green-600 text-3xl mb-2" />
@@ -360,44 +356,29 @@ const FertilizerResult = () => {
           </div>
         </div>
 
-        {/* Right: Recommendation */}
+        {/* Recommendation */}
         <div className="flex-1 bg-green-50 rounded-2xl shadow-lg p-6 hover:scale-105 transition">
           <h2 className="text-2xl font-semibold mb-4 text-green-800 flex items-center gap-2">
             <FaCheckCircle /> Recommendation
           </h2>
-          {parsed.name && (
-            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
-              <span className="font-semibold">Fertilizer</span>
-              <span>{parsed.name}</span>
-            </div>
-          )}
-          {parsed.dosage && (
-            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
-              <span className="font-semibold">Dosage</span>
-              <span>{parsed.dosage}</span>
-            </div>
-          )}
-          {parsed.instructions && (
-            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
-              <span className="font-semibold">Instructions</span>
-              <span>{parsed.instructions}</span>
-            </div>
-          )}
+          {parsed.name && <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col"><span className="font-semibold">Fertilizer</span><span>{parsed.name}</span></div>}
+          {parsed.dosage && <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col"><span className="font-semibold">Dosage</span><span>{parsed.dosage}</span></div>}
+          {parsed.instructions && <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col"><span className="font-semibold">Instructions</span><span>{parsed.instructions}</span></div>}
         </div>
       </div>
 
       <div className="flex gap-6 mt-10">
         <button
           onClick={() => navigate("/fertilizer")}
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-2xl font-semibold transition"
+          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-2xl font-semibold transition flex items-center gap-2"
         >
-          Predict Another
+          <FaRedo /> Predict Another
         </button>
         <button
           onClick={handleDownload}
-          className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-2xl font-semibold transition"
+          className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-2xl font-semibold transition flex items-center gap-2"
         >
-          Download PDF
+          <FaFilePdf /> Download PDF
         </button>
       </div>
     </div>
