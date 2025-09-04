@@ -5,7 +5,7 @@ import fetch from "node-fetch";
 const router = express.Router();
 
 // POST /api/predict-disease
-router.post("/predict-disease", upload.single("image"), async (req, res) => {
+router.post("/", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No image uploaded" });
 

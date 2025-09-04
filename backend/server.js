@@ -651,7 +651,6 @@ import helmet from "helmet";
 import path from "path";
 import mongoose from "mongoose";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import upload from "./middleware/upload.js";
 import predictRoutes from "./routes/predictRoutes.js";
 
 // ===== Routes =====
@@ -659,7 +658,7 @@ import postRoutes from "./routes/postRoutes.js";
 import diseaseRoutes from "./routes/diseaseRoutes.js";
 import diseaseSearchRoutes from "./routes/diseaseSearch_routes.js";
 import authRoutes from "./routes/userRoutes.js";
-app.use("/api", predictRoutes);
+
 
 // ===== Load .env =====
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
@@ -697,6 +696,7 @@ app.use("/api", authRoutes);
 app.use("/api/diseases", diseaseSearchRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/disease-info", diseaseRoutes);
+app.use("/api/predict-disease", predictRoutes);
 
 // ===== Google Gemini Setup =====
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
