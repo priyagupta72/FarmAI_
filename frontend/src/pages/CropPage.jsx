@@ -199,17 +199,36 @@ const CropPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ===== FRONTEND VALIDATION =====
+    const { nitrogen, phosphorous, pottasium, ph, rainfall } = formData;
+    if (
+      nitrogen < 0 || nitrogen > 100 ||
+      phosphorous < 0 || phosphorous > 100 ||
+      pottasium < 0 || pottasium > 100
+    ) {
+      alert("⚠️ N, P, K values must be between 0 and 100");
+      return;
+    }
+    if (ph < 0 || ph > 7) {
+      alert("⚠️ pH value must be between 0 and 7");
+      return;
+    }
+    if (rainfall < 0 || rainfall > 5000) {
+      alert("⚠️ Rainfall must be between 0 and 5000 mm");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const BACKEND_URL = "https://farmai-backend.onrender.com";
-      // Convert all inputs to numbers before sending
+      const BACKEND_URL = "https://farmai-h4bm.onrender.com"; // Correct backend URL
       const payload = {
-        nitrogen: Number(formData.nitrogen),
-        phosphorous: Number(formData.phosphorous),
-        pottasium: Number(formData.pottasium),
-        ph: Number(formData.ph),
-        rainfall: Number(formData.rainfall),
+        nitrogen: Number(nitrogen),
+        phosphorous: Number(phosphorous),
+        pottasium: Number(pottasium),
+        ph: Number(ph),
+        rainfall: Number(rainfall),
       };
 
       const response = await axios.post(`${BACKEND_URL}/api/crop`, payload);
@@ -245,9 +264,7 @@ const CropPage = () => {
             { name: "ph", placeholder: "pH Level", step: "0.01", icon: <FaTint /> },
           ].map((input) => (
             <div key={input.name} className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-green-500">
-                {input.icon}
-              </span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-green-500">{input.icon}</span>
               <input
                 type="number"
                 step={input.step || "1"}

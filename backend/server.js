@@ -759,13 +759,26 @@ app.post("/api/fertilizer", async (req, res) => {
   }
 });
 
-// ===== Crop Recommendation Endpoint =====
 app.post("/api/crop", async (req, res) => {
   try {
     const { nitrogen, phosphorous, pottasium, ph, rainfall } = req.body;
-    if (!nitrogen || !phosphorous || !pottasium || !ph || !rainfall)
-      return res.status(400).json({ recommendation: "Missing fields!" });
 
+    // ===== Backend Validation =====
+    if (
+      nitrogen === undefined || phosphorous === undefined ||
+      pottasium === undefined || ph === undefined ||
+      rainfall === undefined
+    ) {
+      return res.status(400).json({ recommendation: "Missing fields!" });
+    }
+
+    if (nitrogen < 0 || nitrogen > 100) return res.status(400).json({ recommendation: "Invalid Nitrogen value!" });
+    if (phosphorous < 0 || phosphorous > 100) return res.status(400).json({ recommendation: "Invalid Phosphorous value!" });
+    if (pottasium < 0 || pottasium > 100) return res.status(400).json({ recommendation: "Invalid Potassium value!" });
+    if (ph < 0 || ph > 7) return res.status(400).json({ recommendation: "Invalid pH value!" });
+    if (rainfall < 0 || rainfall > 5000) return res.status(400).json({ recommendation: "Invalid Rainfall value!" });
+
+    // Proceed with AI model
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       systemInstruction: "You are an agronomist. Suggest best crop based on N, P, K, pH, rainfall."
