@@ -94,157 +94,118 @@
 
 
 
-import { useLocation, useNavigate } from "react-router-dom";
-import jsPDF from "jspdf";
-import { FaLeaf, FaSeedling, FaFlask, FaCheckCircle } from "react-icons/fa";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const FertilizerResult = () => {
+const FertilizerPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { formData, recommendation } = location.state || {};
+  const [formData, setFormData] = useState({
+    nitrogen: "",
+    phosphorous: "",
+    pottasium: "",
+    cropname: "",
+  });
+  const [loading, setLoading] = useState(false);
 
-  if (!formData || !recommendation) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-        <p className="text-red-600 font-semibold text-lg">⚠️ No data found.</p>
-        <button
-          onClick={() => navigate("/fertilizer-result")}
-          className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
-
-  // ===== Clean parser for AI recommendation =====
-  const parseRecommendation = (text) => {
-    const data = { name: "", dosage: "", instructions: "" };
-
-    // Remove asterisks and extra whitespace
-    const cleanText = text.replace(/\*/g, "").trim();
-
-    // Split by new line and process
-    const lines = cleanText.split("\n").map(l => l.trim()).filter(l => l);
-
-    lines.forEach(line => {
-      const [key, ...rest] = line.split(":");
-      if (!key || !rest) return;
-      const value = rest.join(":").trim();
-
-      const lowerKey = key.toLowerCase();
-      if (lowerKey.includes("fertilizer")) data.name = value;
-      else if (lowerKey.includes("dosage")) data.dosage = value;
-      else if (lowerKey.includes("instructions")) data.instructions = value;
-    });
-
-    return data;
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const parsed = parseRecommendation(recommendation);
+  const handleSubmit = async () => {
+    const { nitrogen, phosphorous, pottasium, cropname } = formData;
+    if (!nitrogen || !phosphorous || !pottasium || !cropname) {
+      alert("Please fill all fields");
+      return;
+    }
 
-  // ===== PDF Download =====
-  const handleDownload = () => {
-    const doc = new jsPDF("p", "pt", "a4");
-    let y = 40;
+    setLoading(true);
 
-    doc.setFontSize(18);
-    doc.text("Fertilizer Recommendation Report", 40, y);
-    y += 30;
+    try {
+      // Replace with your actual API endpoint
+      const res = await fetch("/api/get-fertilizer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    doc.setFontSize(14);
-    doc.text("Input Summary:", 40, y);
-    y += 20;
+      const data = await res.json();
 
-    Object.entries(formData).forEach(([key, value]) => {
-      doc.text(`${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`, 50, y);
-      y += 20;
-    });
+      if (!data.recommendation) {
+        alert("No recommendation returned from server");
+        setLoading(false);
+        return;
+      }
 
-    y += 10;
-    doc.text("Recommendation:", 40, y);
-    y += 20;
+      // Save in localStorage for direct access fallback
+      localStorage.setItem(
+        "fertilizerData",
+        JSON.stringify({ formData, recommendation: data.recommendation })
+      );
 
-    if (parsed.name) { doc.text(`Fertilizer: ${parsed.name}`, 50, y); y += 20; }
-    if (parsed.dosage) { doc.text(`Dosage: ${parsed.dosage}`, 50, y); y += 20; }
-    if (parsed.instructions) { doc.text(`Instructions: ${parsed.instructions}`, 50, y); }
+      // Navigate to result page with state
+      navigate("/fertilizer-result", {
+        state: { formData, recommendation: data.recommendation },
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Error fetching recommendation");
+    }
 
-    doc.save("Fertilizer_Recommendation.pdf");
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 flex flex-col items-center">
-      <h1 className="text-4xl font-bold mb-10 text-green-700 text-center">
-        Fertilizer Recommendation
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
+      <h1 className="text-3xl font-bold text-green-700 mb-8">
+        Fertilizer Prediction
       </h1>
 
-      <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl">
-        {/* Left: Input Summary */}
-        <div className="flex-1 grid grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center hover:scale-105 transition">
-            <FaLeaf className="text-green-600 text-3xl mb-2" />
-            <span className="text-gray-700 font-semibold">Nitrogen</span>
-            <span className="text-gray-900 text-lg">{formData.nitrogen}</span>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center hover:scale-105 transition">
-            <FaSeedling className="text-green-600 text-3xl mb-2" />
-            <span className="text-gray-700 font-semibold">Phosphorous</span>
-            <span className="text-gray-900 text-lg">{formData.phosphorous}</span>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center hover:scale-105 transition">
-            <FaLeaf className="text-green-600 text-3xl mb-2" />
-            <span className="text-gray-700 font-semibold">Potassium</span>
-            <span className="text-gray-900 text-lg">{formData.pottasium}</span>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-4 flex flex-col items-center hover:scale-105 transition">
-            <FaFlask className="text-green-600 text-3xl mb-2" />
-            <span className="text-gray-700 font-semibold">Crop</span>
-            <span className="text-gray-900 text-lg">{formData.cropname}</span>
-          </div>
-        </div>
-
-        {/* Right: Recommendation */}
-        <div className="flex-1 bg-green-50 rounded-2xl shadow-lg p-6 hover:scale-105 transition">
-          <h2 className="text-2xl font-semibold mb-4 text-green-800 flex items-center gap-2">
-            <FaCheckCircle /> Recommendation
-          </h2>
-          {parsed.name && (
-            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
-              <span className="font-semibold">Fertilizer</span>
-              <span>{parsed.name}</span>
-            </div>
-          )}
-          {parsed.dosage && (
-            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
-              <span className="font-semibold">Dosage</span>
-              <span>{parsed.dosage}</span>
-            </div>
-          )}
-          {parsed.instructions && (
-            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
-              <span className="font-semibold">Instructions</span>
-              <span>{parsed.instructions}</span>
-            </div>
-          )}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+        <input
+          type="number"
+          name="nitrogen"
+          placeholder="Nitrogen (N)"
+          value={formData.nitrogen}
+          onChange={handleChange}
+          className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        <input
+          type="number"
+          name="phosphorous"
+          placeholder="Phosphorous (P)"
+          value={formData.phosphorous}
+          onChange={handleChange}
+          className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        <input
+          type="number"
+          name="pottasium"
+          placeholder="Potassium (K)"
+          value={formData.pottasium}
+          onChange={handleChange}
+          className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
+        <input
+          type="text"
+          name="cropname"
+          placeholder="Crop Name"
+          value={formData.cropname}
+          onChange={handleChange}
+          className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+        />
       </div>
 
-      <div className="flex gap-6 mt-10">
-        <button
-          onClick={() => navigate("/fertilizer")}
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-2xl font-semibold transition"
-        >
-          Predict Another
-        </button>
-        <button
-          onClick={handleDownload}
-          className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-2xl font-semibold transition"
-        >
-          Download PDF
-        </button>
-      </div>
+      <button
+        onClick={handleSubmit}
+        disabled={loading}
+        className={`mt-8 w-40 py-2 rounded-2xl font-semibold text-white ${
+          loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+        } transition`}
+      >
+        {loading ? "Predicting..." : "Predict"}
+      </button>
     </div>
   );
 };
 
-export default FertilizerResult;
+export default FertilizerPage;

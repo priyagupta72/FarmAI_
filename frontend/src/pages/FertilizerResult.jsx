@@ -251,11 +251,24 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import { FaLeaf, FaSeedling, FaFlask, FaCheckCircle } from "react-icons/fa";
+import { useEffect, useState } from "react";
 
 const FertilizerResult = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { formData, recommendation } = location.state || {};
+  const [data, setData] = useState({ formData: null, recommendation: "" });
+
+  useEffect(() => {
+    // Priority: location.state > localStorage
+    if (location.state?.formData && location.state?.recommendation) {
+      setData(location.state);
+    } else {
+      const saved = localStorage.getItem("fertilizerData");
+      if (saved) setData(JSON.parse(saved));
+    }
+  }, [location.state]);
+
+  const { formData, recommendation } = data;
 
   if (!formData || !recommendation) {
     return (
@@ -271,11 +284,9 @@ const FertilizerResult = () => {
     );
   }
 
-  // ===== Parse AI response robustly =====
+  // ===== Parse AI response =====
   const parseRecommendation = (text) => {
     const data = { name: "", dosage: "", instructions: "" };
-
-    // Split by lines or by sentence if lines not present
     const lines = text.includes("\n") ? text.split("\n") : text.split(". ");
     lines.forEach((line) => {
       const lower = line.toLowerCase();
@@ -287,7 +298,6 @@ const FertilizerResult = () => {
         data.instructions = line.split(":")[1]?.trim() || line.trim();
       }
     });
-
     return data;
   };
 
@@ -296,6 +306,7 @@ const FertilizerResult = () => {
   const handleDownload = () => {
     const doc = new jsPDF("p", "pt", "a4");
     let y = 40;
+
     doc.setFontSize(18);
     doc.text("Fertilizer Recommendation Report", 40, y);
     y += 30;
