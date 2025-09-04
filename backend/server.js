@@ -749,17 +749,17 @@ app.post("/api/fertilizer", async (req, res) => {
 
     // ===== AI Model Setup =====
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: `
-        You are an experienced agronomist. 
-        Suggest a fertilizer product for the given crop and NPK values.
-        Provide:
-          1. Fertilizer product name
-          2. Dosage (per acre/hectare)
-          3. Application instructions
-        Keep the answer clear, structured, and practical.
-      `
-    });
+  model: "gemini-1.5-flash",
+  systemInstruction: `
+    You are an expert agronomist. 
+    For the given crop and NPK values, provide a fertilizer recommendation including:
+    1. Product/Fertilizer name
+    2. Dosage per acre/hectare
+    3. Step-by-step application instructions
+    Give concise, actionable information only, no general advice.
+  `
+});
+
 
     const prompt = `Crop: ${cropname}, N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
     const result = await model.generateContentStream({

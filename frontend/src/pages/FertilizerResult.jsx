@@ -271,19 +271,23 @@ const FertilizerResult = () => {
     );
   }
 
-  // ===== Parse AI response =====
-  // Expected format:
-  // Fertilizer: XYZ 50-30-20
-  // Dosage: 100 kg/acre
-  // Instructions: Apply at sowing, water after application.
+  // ===== Parse AI response robustly =====
   const parseRecommendation = (text) => {
-    const lines = text.split("\n").map(l => l.trim()).filter(l => l);
-    const data = {};
-    lines.forEach(line => {
-      if (line.toLowerCase().startsWith("fertilizer:")) data.name = line.split(":")[1].trim();
-      else if (line.toLowerCase().startsWith("dosage:")) data.dosage = line.split(":")[1].trim();
-      else if (line.toLowerCase().startsWith("instructions:")) data.instructions = line.split(":")[1].trim();
+    const data = { name: "", dosage: "", instructions: "" };
+
+    // Split by lines or by sentence if lines not present
+    const lines = text.includes("\n") ? text.split("\n") : text.split(". ");
+    lines.forEach((line) => {
+      const lower = line.toLowerCase();
+      if (lower.includes("fertilizer:") || lower.includes("fertilizer name:")) {
+        data.name = line.split(":")[1]?.trim() || line.trim();
+      } else if (lower.includes("dosage:") || lower.includes("apply")) {
+        data.dosage = line.split(":")[1]?.trim() || line.trim();
+      } else if (lower.includes("instructions:") || lower.includes("apply")) {
+        data.instructions = line.split(":")[1]?.trim() || line.trim();
+      }
     });
+
     return data;
   };
 
@@ -307,9 +311,9 @@ const FertilizerResult = () => {
     y += 10;
     doc.text("Recommendation:", 40, y);
     y += 20;
-    if (parsed.name) doc.text(`Fertilizer: ${parsed.name}`, 50, y), y += 20;
-    if (parsed.dosage) doc.text(`Dosage: ${parsed.dosage}`, 50, y), y += 20;
-    if (parsed.instructions) doc.text(`Instructions: ${parsed.instructions}`, 50, y);
+    if (parsed.name) { doc.text(`Fertilizer: ${parsed.name}`, 50, y); y += 20; }
+    if (parsed.dosage) { doc.text(`Dosage: ${parsed.dosage}`, 50, y); y += 20; }
+    if (parsed.instructions) { doc.text(`Instructions: ${parsed.instructions}`, 50, y); }
 
     doc.save("Fertilizer_Recommendation.pdf");
   };
