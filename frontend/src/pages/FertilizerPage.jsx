@@ -108,7 +108,7 @@ const FertilizerResult = () => {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
         <p className="text-red-600 font-semibold text-lg">⚠️ No data found.</p>
         <button
-          onClick={() => navigate("/fertilizer")}
+          onClick={() => navigate("/fertilizer-result")}
           className="mt-4 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
         >
           Go Back
