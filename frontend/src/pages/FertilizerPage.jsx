@@ -122,7 +122,7 @@ const FertilizerPage = () => {
 
     try {
       // Replace with your actual API endpoint
-      const res = await fetch("/api/get-fertilizer", {
+      const res = await fetch("/api/fertilizer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
