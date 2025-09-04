@@ -959,7 +959,7 @@ function UploadDetection() {
       const base64Image = await fileToBase64(file);
 
       // Send JSON request with base64 image
-      const response = await fetch("https://farmai-h4bm.onrender.com/api/predict-disease", {
+      const response = await fetch("https://farmai-h4bm.onrender.com/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: base64Image }),

@@ -696,7 +696,7 @@ app.use("/api", authRoutes);
 app.use("/api/diseases", diseaseSearchRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/disease-info", diseaseRoutes);
-app.use("/api/predict-disease", predictRoutes);
+app.use("/api/upload", predictRoutes);
 
 // ===== Google Gemini Setup =====
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
