@@ -734,8 +734,18 @@ app.post("/api/chat", async (req, res) => {
 app.post("/api/fertilizer", async (req, res) => {
   try {
     const { nitrogen, phosphorous, pottasium, cropname } = req.body;
-    if (!nitrogen || !phosphorous || !pottasium || !cropname)
+
+    // ===== Backend Validation =====
+    if (
+      nitrogen === undefined || phosphorous === undefined ||
+      pottasium === undefined || !cropname || cropname.trim() === ""
+    ) {
       return res.status(400).json({ recommendation: "Missing fields!" });
+    }
+
+    if (nitrogen < 0 || nitrogen > 100) return res.status(400).json({ recommendation: "Invalid Nitrogen value!" });
+    if (phosphorous < 0 || phosphorous > 100) return res.status(400).json({ recommendation: "Invalid Phosphorous value!" });
+    if (pottasium < 0 || pottasium > 100) return res.status(400).json({ recommendation: "Invalid Potassium value!" });
 
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
@@ -758,6 +768,7 @@ app.post("/api/fertilizer", async (req, res) => {
     res.status(500).json({ recommendation: "Something went wrong." });
   }
 });
+
 
 app.post("/api/crop", async (req, res) => {
   try {
