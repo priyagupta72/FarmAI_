@@ -730,7 +730,7 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// ===== Fertilizer Recommendation Endpoint =====
+// ===== Fertilizer Recommendation Endpoint (Improved) =====
 app.post("/api/fertilizer", async (req, res) => {
   try {
     const { nitrogen, phosphorous, pottasium, cropname } = req.body;
@@ -747,12 +747,21 @@ app.post("/api/fertilizer", async (req, res) => {
     if (phosphorous < 0 || phosphorous > 100) return res.status(400).json({ recommendation: "Invalid Phosphorous value!" });
     if (pottasium < 0 || pottasium > 100) return res.status(400).json({ recommendation: "Invalid Potassium value!" });
 
+    // ===== AI Model Setup =====
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      systemInstruction: "You are an agronomist. Suggest fertilizer based on N, P, K."
+      systemInstruction: `
+        You are an experienced agronomist. 
+        Suggest a fertilizer product for the given crop and NPK values.
+        Provide:
+          1. Fertilizer product name
+          2. Dosage (per acre/hectare)
+          3. Application instructions
+        Keep the answer clear, structured, and practical.
+      `
     });
 
-    const prompt = `Fertilizer for ${cropname} with N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
+    const prompt = `Crop: ${cropname}, N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
     const result = await model.generateContentStream({
       contents: [{ role: "user", parts: [{ text: prompt }] }]
     });
@@ -762,12 +771,13 @@ app.post("/api/fertilizer", async (req, res) => {
       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
     }
 
-    res.json({ recommendation: recommendation.trim() || "No recommendation." });
+    res.json({ recommendation: recommendation.trim() || "No recommendation available." });
   } catch (err) {
     console.error("Fertilizer API error:", err);
     res.status(500).json({ recommendation: "Something went wrong." });
   }
 });
+
 
 
 app.post("/api/crop", async (req, res) => {

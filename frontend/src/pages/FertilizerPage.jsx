@@ -108,7 +108,6 @@ const FertilizerPage = () => {
     pottasium: "",
     cropname: "",
   });
-
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -119,27 +118,35 @@ const FertilizerPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    // ===== Frontend Validation =====
     const { nitrogen, phosphorous, pottasium, cropname } = formData;
+
+    // ===== Frontend validation =====
     if (
-      !nitrogen || !phosphorous || !pottasium || !cropname ||
-      nitrogen < 0 || nitrogen > 100 ||
-      phosphorous < 0 || phosphorous > 100 ||
-      pottasium < 0 || pottasium > 100
+      nitrogen === "" ||
+      phosphorous === "" ||
+      pottasium === "" ||
+      cropname.trim() === "" ||
+      nitrogen < 0 ||
+      nitrogen > 100 ||
+      phosphorous < 0 ||
+      phosphorous > 100 ||
+      pottasium < 0 ||
+      pottasium > 100
     ) {
-      alert("⚠️ Please enter valid values: N, P, K (0-100) and crop name.");
+      alert("Please enter valid values: N, P, K (0-100) and crop name.");
       setLoading(false);
       return;
     }
 
     try {
-      const BACKEND_URL = "https://farmai-h4bm.onrender.com/api/fertilizer";
+      const BACKEND_URL = "https://farmai-h4bm.onrender.com";
       const payload = {
         nitrogen: Number(nitrogen),
         phosphorous: Number(phosphorous),
         pottasium: Number(pottasium),
-        cropname,
+        cropname: cropname.trim(),
       };
+
       const response = await axios.post(`${BACKEND_URL}/api/fertilizer`, payload);
       const recommendation = response.data.recommendation;
 
@@ -165,7 +172,6 @@ const FertilizerPage = () => {
           Fertilizer Recommendation
         </h1>
 
-        {/* Inputs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             { name: "nitrogen", placeholder: "Nitrogen (N)", icon: <FaLeaf /> },

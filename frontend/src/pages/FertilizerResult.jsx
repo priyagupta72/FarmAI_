@@ -271,11 +271,23 @@ const FertilizerResult = () => {
     );
   }
 
-  const cleanRecommendation = recommendation
-    .replace(/[*-]+/g, "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+  // ===== Parse AI response =====
+  // Expected format:
+  // Fertilizer: XYZ 50-30-20
+  // Dosage: 100 kg/acre
+  // Instructions: Apply at sowing, water after application.
+  const parseRecommendation = (text) => {
+    const lines = text.split("\n").map(l => l.trim()).filter(l => l);
+    const data = {};
+    lines.forEach(line => {
+      if (line.toLowerCase().startsWith("fertilizer:")) data.name = line.split(":")[1].trim();
+      else if (line.toLowerCase().startsWith("dosage:")) data.dosage = line.split(":")[1].trim();
+      else if (line.toLowerCase().startsWith("instructions:")) data.instructions = line.split(":")[1].trim();
+    });
+    return data;
+  };
+
+  const parsed = parseRecommendation(recommendation);
 
   const handleDownload = () => {
     const doc = new jsPDF("p", "pt", "a4");
@@ -295,10 +307,9 @@ const FertilizerResult = () => {
     y += 10;
     doc.text("Recommendation:", 40, y);
     y += 20;
-    cleanRecommendation.forEach((item) => {
-      doc.text(`- ${item}`, 50, y);
-      y += 20;
-    });
+    if (parsed.name) doc.text(`Fertilizer: ${parsed.name}`, 50, y), y += 20;
+    if (parsed.dosage) doc.text(`Dosage: ${parsed.dosage}`, 50, y), y += 20;
+    if (parsed.instructions) doc.text(`Instructions: ${parsed.instructions}`, 50, y);
 
     doc.save("Fertilizer_Recommendation.pdf");
   };
@@ -339,11 +350,24 @@ const FertilizerResult = () => {
           <h2 className="text-2xl font-semibold mb-4 text-green-800 flex items-center gap-2">
             <FaCheckCircle /> Recommendation
           </h2>
-          <ul className="list-disc pl-6 text-gray-800 space-y-2">
-            {cleanRecommendation.map((item, idx) => (
-              <li key={idx}>{item}</li>
-            ))}
-          </ul>
+          {parsed.name && (
+            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
+              <span className="font-semibold">Fertilizer</span>
+              <span>{parsed.name}</span>
+            </div>
+          )}
+          {parsed.dosage && (
+            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
+              <span className="font-semibold">Dosage</span>
+              <span>{parsed.dosage}</span>
+            </div>
+          )}
+          {parsed.instructions && (
+            <div className="mb-3 p-4 bg-white rounded-lg shadow flex flex-col">
+              <span className="font-semibold">Instructions</span>
+              <span>{parsed.instructions}</span>
+            </div>
+          )}
         </div>
       </div>
 
