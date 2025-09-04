@@ -747,18 +747,26 @@ app.post("/api/fertilizer", async (req, res) => {
     if (phosphorous < 0 || phosphorous > 100) return res.status(400).json({ recommendation: "Invalid Phosphorous value!" });
     if (pottasium < 0 || pottasium > 100) return res.status(400).json({ recommendation: "Invalid Potassium value!" });
 
-    // ===== AI Model Setup =====
-    const model = genAI.getGenerativeModel({
+   // ===== AI Model Setup =====
+const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
   systemInstruction: `
-    You are an expert agronomist. 
-    For the given crop and NPK values, provide a fertilizer recommendation including:
-    1. Product/Fertilizer name
-    2. Dosage per acre/hectare
-    3. Step-by-step application instructions
-    Give concise, actionable information only, no general advice.
+    You are an expert agronomist.
+    For the given crop and NPK values:
+    1. Provide Fertilizer/Product name.
+    2. Provide Dosage per acre/hectare in plain text.
+    3. Provide Instructions in plain text ONLY, concise and actionable.
+       - Include when to apply and how to apply.
+       - Do NOT add any *, -, bullets, or markdown symbols.
+       - Do NOT repeat the word "Instructions" inside the content.
+    Output MUST exactly match:
+    Fertilizer: [name]
+    Dosage: [dosage]
+    Instructions: [instructions]
   `
 });
+
+
 
 
     const prompt = `Crop: ${cropname}, N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
