@@ -116,7 +116,7 @@ export default function ChatButton({ setIsChatOpen, isChatOpen }) {
   whileHover="hover"
 >
   <span>🤖</span>
-  <span>Ask the Plant AI</span>
+  <span>Ask the Farm AI</span>
 </motion.button>
 
         </>
