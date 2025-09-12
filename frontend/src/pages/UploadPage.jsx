@@ -1,1153 +1,144 @@
-// import { useState } from "react";
-// import { motion, AnimatePresence } from "framer-motion";
-// import * as tmImage from "@teachablemachine/image";
-// import { FaUpload, FaSearch, FaInfoCircle, FaLeaf } from "react-icons/fa";
-// import { FiX } from "react-icons/fi";
-// import { fetchDiseaseInfoFromAPI } from "../api/diseaseInfo";
-
-// const modelURL = "/assets/my_model/model.json";
-// const metadataURL = "/assets/my_model/metadata.json";
-
-// function UploadDetection() {
- 
-//   const [file, setFile] = useState(null);
-//   const [preview, setPreview] = useState(null);
-//   const [result, setResult] = useState(null);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [diseaseInfo, setDiseaseInfo] = useState(null);
-//   const [showPopup, setShowPopup] = useState(false);
-
-//   let model;
-
-//   async function loadModel() {
-//     model = await tmImage.load(modelURL, metadataURL);
-//   }
-
-//   const handleFileChange = (e) => {
-//     const selectedFile = e.target.files[0];
-//     if (!selectedFile || !selectedFile.type.startsWith("image/")) {
-//       setError("Only image files (JPG, PNG) are allowed.");
-//       return;
-//     }
-//     setFile(selectedFile);
-//     setPreview(URL.createObjectURL(selectedFile));
-//     setError(null);
-//     setResult(null);
-//   };
-
-//   const handlePrediction = async () => {
-//     if (!file) {
-//       setError("Please upload an image first.");
-//       return;
-//     }
-//     setLoading(true);
-//     setError(null);
-
-//     const img = document.createElement("img");
-//     img.src = URL.createObjectURL(file);
-//     img.onload = async () => {
-//       await loadModel();
-//       setTimeout(async () => {
-//         const prediction = await model.predict(img);
-//         const bestMatch = prediction.reduce((max, item) =>
-//           item.probability > max.probability ? item : max
-//         );
-//         setResult({
-//           disease: bestMatch.className,
-//           confidence: (bestMatch.probability * 100).toFixed(2) + "%",
-//           remedies: "Suggested remedies will be based on the detected disease.",
-//         });
-//         setLoading(false);
-//       }, 2000);
-//     };
-//   };
-
-//   const fetchDiseaseInfo = async () => {
-//     if (!result) return;
-//     try {
-//       setLoading(true);
-//       const data = await fetchDiseaseInfoFromAPI(result.disease);
-//       setDiseaseInfo(data);
-//       setShowPopup(true);
-//     } catch (error) {
-//       console.error("Error fetching disease info:", error);
-//       setError(error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
-//       <motion.div 
-//         initial={{ opacity: 0, y: 20 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         className="max-w-3xl mx-auto"
-//       >
-       
-//         <div className="text-center mb-10">
-//           <div className="inline-flex items-center justify-center bg-green-100 text-green-800 rounded-full p-3 mb-4">
-//             <FaLeaf className="text-xl" />
-//           </div>
-//           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-//             AI-Powered Crop Health Scanner
-//           </h1>
-//           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-//             Upload an image to detect plant diseases and get treatment recommendations
-//           </p>
-//         </div>
-
-      
-//         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-//           <div className="p-6 sm:p-8">
-          
-//             <label className="group cursor-pointer">
-//               <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
-//                 error ? 'border-red-300 bg-red-50' : 'border-green-300 hover:border-green-400 hover:bg-green-50'
-//               }`}>
-//                 <div className="flex flex-col items-center justify-center space-y-3">
-//                   <div className="p-4 bg-green-100 rounded-full text-green-600 group-hover:bg-green-200 transition">
-//                     <FaUpload className="text-2xl" />
-//                   </div>
-//                   <div>
-//                     <p className="font-medium text-gray-700">
-//                       {preview ? "Image ready for analysis" : "Click to upload plant image"}
-//                     </p>
-//                     <p className="text-sm text-gray-500 mt-1">
-//                       {preview ? file.name : "JPEG, PNG (Max 5MB)"}
-//                     </p>
-//                   </div>
-//                 </div>
-//               </div>
-//               <input 
-//                 type="file" 
-//                 onChange={handleFileChange} 
-//                 accept="image/*" 
-//                 className="hidden" 
-//               />
-//             </label>
-
-           
-//             {error && (
-//               <motion.div 
-//                 initial={{ opacity: 0, y: 10 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-start"
-//               >
-//                 <FiX className="flex-shrink-0 mt-0.5 mr-2" />
-//                 <span>{error}</span>
-//               </motion.div>
-//             )}
-
-           
-//             {preview && (
-//               <motion.div
-//                 initial={{ opacity: 0, scale: 0.95 }}
-//                 animate={{ opacity: 1, scale: 1 }}
-//                 className="mt-6 flex flex-col items-center"
-//               >
-//                 <div className="relative w-full max-w-md">
-//                   <img 
-//                     src={preview} 
-//                     alt="Plant preview" 
-//                     className="w-full h-auto rounded-lg shadow-md border border-gray-200"
-//                   />
-//                   {loading && (
-//                     <div className="absolute inset-0 bg-black bg-opacity-30 rounded-lg flex items-center justify-center">
-//                       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-//                     </div>
-//                   )}
-//                 </div>
-
-//                 <motion.button
-//                   whileHover={{ scale: 1.03 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   onClick={handlePrediction}
-//                   disabled={loading}
-//                   className={`mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-//                     loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
-//                   }`}
-//                 >
-//                   <FaSearch className="mr-2" />
-//                   {loading ? 'Analyzing...' : 'Detect Disease'}
-//                 </motion.button>
-//               </motion.div>
-//             )}
-//           </div>
-
-          
-//           {result && (
-//             <motion.div
-//               initial={{ opacity: 0, y: 20 }}
-//               animate={{ opacity: 1, y: 0 }}
-//               className="bg-gray-50 border-t border-gray-200 p-6 sm:p-8"
-//             >
-//               <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-//                 <FaLeaf className="text-green-500 mr-2" />
-//                 Detection Results
-//               </h3>
-
-//               <div className="space-y-4">
-//                 <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm">
-//                   <span className="font-medium text-gray-700">Disease Identified</span>
-//                   <span className="font-semibold text-gray-900">{result.disease}</span>
-//                 </div>
-
-//                 <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm">
-//                   <span className="font-medium text-gray-700">Confidence Level</span>
-//                   <span className="font-bold text-green-600">
-//                     {result.confidence}
-//                   </span>
-//                 </div>
-
-               
-//                 <motion.button
-//                   whileHover={{ scale: 1.02 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   onClick={fetchDiseaseInfo}
-//                   disabled={loading}
-//                   className={`w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-//                     loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
-//                   }`}
-//                 >
-//                   <FaInfoCircle className="mr-2" />
-//                   {loading ? 'Loading Details...' : 'View Detailed Information'}
-//                 </motion.button>
-//               </div>
-//             </motion.div>
-//           )}
-//         </div>
-//       </motion.div>
-
-     
-//       <AnimatePresence>
-//         {showPopup && diseaseInfo && (
-//           <motion.div
-//             initial={{ opacity: 0 }}
-//             animate={{ opacity: 1 }}
-//             exit={{ opacity: 0 }}
-//             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-//             onClick={() => setShowPopup(false)}
-//           >
-//             <motion.div
-//               initial={{ scale: 0.9, y: 20 }}
-//               animate={{ scale: 1, y: 0 }}
-//               exit={{ scale: 0.9, y: 20 }}
-//               className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-//               onClick={(e) => e.stopPropagation()}
-//             >
-//               <div className="p-6 sm:p-8">
-//                 <div className="flex justify-between items-start mb-6">
-//                   <div>
-//                     <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-//                       <FaLeaf className="text-green-500 mr-2" />
-//                       {result.disease}
-//                     </h2>
-//                     <div className="mt-1 flex items-center">
-//                       <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-//                         Confidence: {result.confidence}
-//                       </span>
-//                     </div>
-//                   </div>
-//                   <button 
-//                     onClick={() => setShowPopup(false)}
-//                     className="p-1 rounded-full hover:bg-gray-100"
-//                   >
-//                     <FiX className="text-gray-500" />
-//                   </button>
-//                 </div>
-
-//                 <div className="space-y-6">
-//                   <div>
-//                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-//                     <p className="text-gray-700">{diseaseInfo.description}</p>
-//                   </div>
-
-//                   <div>
-//                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Symptoms</h3>
-//                     <ul className="list-disc pl-5 space-y-1 text-gray-700">
-//                       {diseaseInfo.symptoms.split(';').map((symptom, i) => (
-//                         <li key={i}>{symptom.trim()}</li>
-//                       ))}
-//                     </ul>
-//                   </div>
-
-//                   <div>
-//                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Treatment Options</h3>
-//                     <div className="bg-green-50 rounded-lg p-4">
-//                       <ul className="space-y-3">
-//                         {diseaseInfo.treatment.split(';').map((treatment, i) => (
-//                           <li key={i} className="flex items-start">
-//                             <span className="flex-shrink-0 bg-green-100 text-green-800 rounded-full p-1 mr-3">
-//                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-//                               </svg>
-//                             </span>
-//                             <span className="text-gray-700">{treatment.trim()}</span>
-//                           </li>
-//                         ))}
-//                       </ul>
-//                     </div>
-//                   </div>
-
-//                   <button
-//                     onClick={() => setShowPopup(false)}
-//                     className="w-full mt-6 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-//                   >
-//                     Close Details
-//                   </button>
-//                 </div>
-//               </div>
-//             </motion.div>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-//     </div>
-//   );
-// }
-
-// export default UploadDetection;
-
-
-
-
-
-
-
-
-
-
-
-// import { useState } from "react";
-// import { motion, AnimatePresence } from "framer-motion";
-// import * as tmImage from "@teachablemachine/image";
-// import { FaUpload, FaSearch, FaInfoCircle, FaLeaf } from "react-icons/fa";
-// import { FiX } from "react-icons/fi";
-// import { fetchDiseaseInfoFromAPI } from "../api/diseaseInfo";
-
-// const modelURL = "/assets/my_model/model.json";
-// const metadataURL = "/assets/my_model/metadata.json";
-
-// function UploadDetection() {
-//   const [file, setFile] = useState(null);
-//   const [preview, setPreview] = useState(null);
-//   const [result, setResult] = useState(null);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [diseaseInfo, setDiseaseInfo] = useState(null);
-//   const [showPopup, setShowPopup] = useState(false);
-
-//   let model;
-
-//   async function loadModel() {
-//     model = await tmImage.load(modelURL, metadataURL);
-//   }
-
-//   const handleFileChange = (e) => {
-//     const selectedFile = e.target.files[0];
-//     if (!selectedFile || !selectedFile.type.startsWith("image/")) {
-//       setError("Only image files (JPG, PNG) are allowed.");
-//       return;
-//     }
-//     setFile(selectedFile);
-//     setPreview(URL.createObjectURL(selectedFile));
-//     setError(null);
-//     setResult(null);
-//   };
-
-//   const handlePrediction = async () => {
-//     if (!file) {
-//       setError("Please upload an image first.");
-//       return;
-//     }
-//     setLoading(true);
-//     setError(null);
-
-//     const img = document.createElement("img");
-//     img.src = URL.createObjectURL(file);
-//     img.onload = async () => {
-//       await loadModel();
-//       setTimeout(async () => {
-//         const prediction = await model.predict(img);
-
-//         // Find best match
-//         const bestMatch = prediction.reduce(
-//           (max, item) => (item.probability > max.probability ? item : max),
-//           { className: "Unknown", probability: 0 }
-//         );
-
-//         // If confidence is too low, treat as unknown
-//         const confidenceThreshold = 0.50; // 50% threshold
-//         const isUnknown = bestMatch.probability < confidenceThreshold;
-
-//         setResult({
-//           disease: isUnknown ? "Unknown" : bestMatch.className,
-//           confidence: isUnknown
-//             ? "N/A"
-//             : (bestMatch.probability * 100).toFixed(2) + "%",
-//           remedies: isUnknown
-//             ? "Cannot provide treatment for unknown images."
-//             : "Suggested remedies will be based on the detected disease.",
-//         });
-
-//         setLoading(false);
-//       }, 2000);
-//     };
-
-//     img.onerror = () => {
-//       setError("Failed to load image. Please try a different file.");
-//       setLoading(false);
-//     };
-//   };
-
-//   const fetchDiseaseInfo = async () => {
-//     if (!result || result.disease === "Unknown") return;
-//     try {
-//       setLoading(true);
-//       const data = await fetchDiseaseInfoFromAPI(result.disease);
-//       setDiseaseInfo(data);
-//       setShowPopup(true);
-//     } catch (error) {
-//       console.error("Error fetching disease info:", error);
-//       setError(error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
-//       <motion.div
-//         initial={{ opacity: 0, y: 20 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         className="max-w-3xl mx-auto"
-//       >
-//         <div className="text-center mb-10">
-//           <div className="inline-flex items-center justify-center bg-green-100 text-green-800 rounded-full p-3 mb-4">
-//             <FaLeaf className="text-xl" />
-//           </div>
-//           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-//             AI-Powered Crop Health Scanner
-//           </h1>
-//           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-//             Upload an image to detect plant diseases and get treatment
-//             recommendations
-//           </p>
-//         </div>
-
-//         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-//           <div className="p-6 sm:p-8">
-//             <label className="group cursor-pointer">
-//               <div
-//                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
-//                   error
-//                     ? "border-red-300 bg-red-50"
-//                     : "border-green-300 hover:border-green-400 hover:bg-green-50"
-//                 }`}
-//               >
-//                 <div className="flex flex-col items-center justify-center space-y-3">
-//                   <div className="p-4 bg-green-100 rounded-full text-green-600 group-hover:bg-green-200 transition">
-//                     <FaUpload className="text-2xl" />
-//                   </div>
-//                   <div>
-//                     <p className="font-medium text-gray-700">
-//                       {preview
-//                         ? "Image ready for analysis"
-//                         : "Click to upload plant image"}
-//                     </p>
-//                     <p className="text-sm text-gray-500 mt-1">
-//                       {preview ? file.name : "JPEG, PNG (Max 5MB)"}
-//                     </p>
-//                   </div>
-//                 </div>
-//               </div>
-//               <input
-//                 type="file"
-//                 onChange={handleFileChange}
-//                 accept="image/*"
-//                 className="hidden"
-//               />
-//             </label>
-
-//             {error && (
-//               <motion.div
-//                 initial={{ opacity: 0, y: 10 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-start"
-//               >
-//                 <FiX className="flex-shrink-0 mt-0.5 mr-2" />
-//                 <span>{error}</span>
-//               </motion.div>
-//             )}
-
-//             {preview && (
-//               <motion.div
-//                 initial={{ opacity: 0, scale: 0.95 }}
-//                 animate={{ opacity: 1, scale: 1 }}
-//                 className="mt-6 flex flex-col items-center"
-//               >
-//                 <div className="relative w-full max-w-md">
-//                   <img
-//                     src={preview}
-//                     alt="Plant preview"
-//                     className="w-full h-auto rounded-lg shadow-md border border-gray-200"
-//                   />
-//                   {loading && (
-//                     <div className="absolute inset-0 bg-black bg-opacity-30 rounded-lg flex items-center justify-center">
-//                       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-//                     </div>
-//                   )}
-//                 </div>
-
-//                 <motion.button
-//                   whileHover={{ scale: 1.03 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   onClick={handlePrediction}
-//                   disabled={loading}
-//                   className={`mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-//                     loading
-//                       ? "bg-gray-400 cursor-not-allowed"
-//                       : "bg-green-600 hover:bg-green-700 focus:ring-green-500"
-//                   }`}
-//                 >
-//                   <FaSearch className="mr-2" />
-//                   {loading ? "Analyzing..." : "Detect Disease"}
-//                 </motion.button>
-//               </motion.div>
-//             )}
-//           </div>
-
-//           {result && (
-//             <motion.div
-//               initial={{ opacity: 0, y: 20 }}
-//               animate={{ opacity: 1, y: 0 }}
-//               className="bg-gray-50 border-t border-gray-200 p-6 sm:p-8"
-//             >
-//               <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-//                 <FaLeaf className="text-green-500 mr-2" />
-//                 Detection Results
-//               </h3>
-
-//               <div className="space-y-4">
-//                 <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm">
-//                   <span className="font-medium text-gray-700">Disease Identified</span>
-//                   <span className="font-semibold text-gray-900">{result.disease}</span>
-//                 </div>
-
-//                 <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm">
-//                   <span className="font-medium text-gray-700">Confidence Level</span>
-//                   <span className="font-bold text-green-600">{result.confidence}</span>
-//                 </div>
-
-//                 <motion.button
-//                   whileHover={{ scale: 1.02 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   onClick={fetchDiseaseInfo}
-//                   disabled={loading || result.disease === "Unknown"}
-//                   className={`w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-//                     loading || result.disease === "Unknown"
-//                       ? "bg-blue-400 cursor-not-allowed"
-//                       : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-//                   }`}
-//                 >
-//                   <FaInfoCircle className="mr-2" />
-//                   {loading ? "Loading Details..." : "View Detailed Information"}
-//                 </motion.button>
-//               </div>
-//             </motion.div>
-//           )}
-//         </div>
-//       </motion.div>
-
-//       <AnimatePresence>
-//         {showPopup && diseaseInfo && (
-//           <motion.div
-//             initial={{ opacity: 0 }}
-//             animate={{ opacity: 1 }}
-//             exit={{ opacity: 0 }}
-//             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-//             onClick={() => setShowPopup(false)}
-//           >
-//             <motion.div
-//               initial={{ scale: 0.9, y: 20 }}
-//               animate={{ scale: 1, y: 0 }}
-//               exit={{ scale: 0.9, y: 20 }}
-//               className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-//               onClick={(e) => e.stopPropagation()}
-//             >
-//               <div className="p-6 sm:p-8">
-//                 <div className="flex justify-between items-start mb-6">
-//                   <div>
-//                     <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-//                       <FaLeaf className="text-green-500 mr-2" />
-//                       {result.disease}
-//                     </h2>
-//                     <div className="mt-1 flex items-center">
-//                       <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-//                         Confidence: {result.confidence}
-//                       </span>
-//                     </div>
-//                   </div>
-//                   <button
-//                     onClick={() => setShowPopup(false)}
-//                     className="p-1 rounded-full hover:bg-gray-100"
-//                   >
-//                     <FiX className="text-gray-500" />
-//                   </button>
-//                 </div>
-
-//                 {result.disease !== "Unknown" ? (
-//                   <div className="space-y-6">
-//                     <div>
-//                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
-//                         Description
-//                       </h3>
-//                       <p className="text-gray-700">{diseaseInfo.description}</p>
-//                     </div>
-
-//                     <div>
-//                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Symptoms</h3>
-//                       <ul className="list-disc pl-5 space-y-1 text-gray-700">
-//                         {diseaseInfo.symptoms.split(";").map((symptom, i) => (
-//                           <li key={i}>{symptom.trim()}</li>
-//                         ))}
-//                       </ul>
-//                     </div>
-
-//                     <div>
-//                       <h3 className="text-lg font-semibold text-gray-900 mb-2">Treatment Options</h3>
-//                       <div className="bg-green-50 rounded-lg p-4">
-//                         <ul className="space-y-3">
-//                           {diseaseInfo.treatment.split(";").map((treatment, i) => (
-//                             <li key={i} className="flex items-start">
-//                               <span className="flex-shrink-0 bg-green-100 text-green-800 rounded-full p-1 mr-3">
-//                                 <svg
-//                                   xmlns="http://www.w3.org/2000/svg"
-//                                   className="h-4 w-4"
-//                                   fill="none"
-//                                   viewBox="0 0 24 24"
-//                                   stroke="currentColor"
-//                                 >
-//                                   <path
-//                                     strokeLinecap="round"
-//                                     strokeLinejoin="round"
-//                                     strokeWidth={2}
-//                                     d="M5 13l4 4L19 7"
-//                                   />
-//                                 </svg>
-//                               </span>
-//                               <span className="text-gray-700">{treatment.trim()}</span>
-//                             </li>
-//                           ))}
-//                         </ul>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 ) : (
-//                   <p className="text-gray-700 text-center mt-6">
-//                     Cannot provide information for unknown images.
-//                   </p>
-//                 )}
-
-//                 <button
-//                   onClick={() => setShowPopup(false)}
-//                   className="w-full mt-6 inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-//                 >
-//                   Close Details
-//                 </button>
-//               </div>
-//             </motion.div>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-//     </div>
-//   );
-// }
-
-// export default UploadDetection;
-
-
-
-
-// import { useState } from "react";
-// import { motion, AnimatePresence } from "framer-motion";
-// import { FaUpload, FaSearch, FaInfoCircle, FaLeaf } from "react-icons/fa";
-// import { FiX } from "react-icons/fi";
-// import { fetchDiseaseInfoFromAPI } from "../api/diseaseInfo";
-
-// function UploadDetection() {
-//   const [file, setFile] = useState(null);
-//   const [preview, setPreview] = useState(null);
-//   const [result, setResult] = useState(null);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [diseaseInfo, setDiseaseInfo] = useState(null);
-//   const [showPopup, setShowPopup] = useState(false);
-
-//   const handleFileChange = (e) => {
-//     const selectedFile = e.target.files[0];
-//     if (!selectedFile || !selectedFile.type.startsWith("image/")) {
-//       setError("Only image files (JPG, PNG) are allowed.");
-//       return;
-//     }
-//     setFile(selectedFile);
-//     setPreview(URL.createObjectURL(selectedFile));
-//     setError(null);
-//     setResult(null);
-//   };
-
-//   const handlePrediction = async () => {
-//     if (!file) {
-//       setError("Please upload an image first.");
-//       return;
-//     }
-//     setLoading(true);
-//     setError(null);
-
-//     try {
-//       const formData = new FormData();
-//       formData.append("image", file);
-
-//       const response = await fetch("https://farmai-h4bm.onrender.com/api/predict-disease", {
-//         method: "POST",
-//         body: formData,
-//       });
-
-//       if (!response.ok) {
-//         throw new Error("Prediction failed. Try again.");
-//       }
-
-//       const data = await response.json();
-//       const bestMatch = data.predictions?.[0] || { class: "Unknown", confidence: 0 };
-//       const confidenceThreshold = 0.50;
-
-//       setResult({
-//         disease: bestMatch.confidence < confidenceThreshold ? "Unknown" : bestMatch.class,
-//         confidence:
-//           bestMatch.confidence < confidenceThreshold
-//             ? "N/A"
-//             : (bestMatch.confidence * 100).toFixed(2) + "%",
-//         remedies:
-//           bestMatch.confidence < confidenceThreshold
-//             ? "Cannot provide treatment for unknown images."
-//             : "Suggested remedies will be based on the detected disease.",
-//       });
-//     } catch (err) {
-//       setError(err.message);
-//       console.error(err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const fetchDiseaseInfo = async () => {
-//     if (!result || result.disease === "Unknown") return;
-//     try {
-//       setLoading(true);
-//       const data = await fetchDiseaseInfoFromAPI(result.disease);
-//       setDiseaseInfo(data);
-//       setShowPopup(true);
-//     } catch (error) {
-//       console.error("Error fetching disease info:", error);
-//       setError(error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
-//       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
-//         {/* Header */}
-//         <div className="text-center mb-10">
-//           <div className="inline-flex items-center justify-center bg-green-100 text-green-800 rounded-full p-3 mb-4">
-//             <FaLeaf className="text-xl" />
-//           </div>
-//           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">AI-Powered Crop Health Scanner</h1>
-//           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-//             Upload an image to detect plant diseases and get treatment recommendations
-//           </p>
-//         </div>
-
-//         {/* Upload & Analyze */}
-//         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-//           <div className="p-6 sm:p-8">
-//             <label className="group cursor-pointer">
-//               <div
-//                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
-//                   error
-//                     ? "border-red-300 bg-red-50"
-//                     : "border-green-300 hover:border-green-400 hover:bg-green-50"
-//                 }`}
-//               >
-//                 <div className="flex flex-col items-center justify-center space-y-3">
-//                   <div className="p-4 bg-green-100 rounded-full text-green-600 group-hover:bg-green-200 transition">
-//                     <FaUpload className="text-2xl" />
-//                   </div>
-//                   <div>
-//                     <p className="font-medium text-gray-700">
-//                       {preview ? "Image ready for analysis" : "Click to upload plant image"}
-//                     </p>
-//                     <p className="text-sm text-gray-500 mt-1">{preview ? file.name : "JPEG, PNG (Max 5MB)"}</p>
-//                   </div>
-//                 </div>
-//               </div>
-//               <input type="file" onChange={handleFileChange} accept="image/*" className="hidden" />
-//             </label>
-
-//             {error && (
-//               <motion.div
-//                 initial={{ opacity: 0, y: 10 }}
-//                 animate={{ opacity: 1, y: 0 }}
-//                 className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-start"
-//               >
-//                 <FiX className="flex-shrink-0 mt-0.5 mr-2" />
-//                 <span>{error}</span>
-//               </motion.div>
-//             )}
-
-//             {preview && (
-//               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mt-6 flex flex-col items-center">
-//                 <div className="relative w-full max-w-md">
-//                   <img src={preview} alt="Plant preview" className="w-full h-auto rounded-lg shadow-md border border-gray-200" />
-//                   {loading && (
-//                     <div className="absolute inset-0 bg-black bg-opacity-30 rounded-lg flex items-center justify-center">
-//                       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-//                     </div>
-//                   )}
-//                 </div>
-
-//                 <motion.button
-//                   whileHover={{ scale: 1.03 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   onClick={handlePrediction}
-//                   disabled={loading}
-//                   className={`mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-//                     loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 focus:ring-green-500"
-//                   }`}
-//                 >
-//                   <FaSearch className="mr-2" />
-//                   {loading ? "Analyzing..." : "Detect Disease"}
-//                 </motion.button>
-//               </motion.div>
-//             )}
-//           </div>
-
-//           {/* Results */}
-//           {result && (
-//             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-gray-50 border-t border-gray-200 p-6 sm:p-8">
-//               <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-//                 <FaLeaf className="text-green-500 mr-2" />
-//                 Detection Results
-//               </h3>
-
-//               <div className="space-y-4">
-//                 <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm">
-//                   <span className="font-medium text-gray-700">Disease Identified</span>
-//                   <span className="font-semibold text-gray-900">{result.disease}</span>
-//                 </div>
-
-//                 <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm">
-//                   <span className="font-medium text-gray-700">Confidence Level</span>
-//                   <span className="font-bold text-green-600">{result.confidence}</span>
-//                 </div>
-
-//                 <motion.button
-//                   whileHover={{ scale: 1.02 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   onClick={fetchDiseaseInfo}
-//                   disabled={loading || result.disease === "Unknown"}
-//                   className={`w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-//                     loading || result.disease === "Unknown"
-//                       ? "bg-blue-400 cursor-not-allowed"
-//                       : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-//                   }`}
-//                 >
-//                   <FaInfoCircle className="mr-2" />
-//                   {loading ? "Loading Details..." : "View Detailed Information"}
-//                 </motion.button>
-//               </div>
-//             </motion.div>
-//           )}
-//         </div>
-//       </motion.div>
-
-//       {/* Disease Info Popup */}
-//       <AnimatePresence>
-//         {showPopup && diseaseInfo && (
-//           <motion.div
-//             initial={{ opacity: 0 }}
-//             animate={{ opacity: 1 }}
-//             exit={{ opacity: 0 }}
-//             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-//             onClick={() => setShowPopup(false)}
-//           >
-//             <motion.div
-//               initial={{ scale: 0.9, y: 20 }}
-//               animate={{ scale: 1, y: 0 }}
-//               exit={{ scale: 0.9, y: 20 }}
-//               className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-//               onClick={(e) => e.stopPropagation()}
-//             >
-//               {/* Popup content is same as your previous implementation */}
-//               {/* ... */}
-//             </motion.div>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-//     </div>
-//   );
-// }
-
-// export default UploadDetection;
-
-
-
-
-
-
-
-
-
-
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FaUpload, FaSearch, FaInfoCircle, FaLeaf } from "react-icons/fa";
-import { FiX } from "react-icons/fi";
-import { fetchDiseaseInfoFromAPI } from "../api/diseaseInfo";
-
-function UploadDetection() {
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [diseaseInfo, setDiseaseInfo] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile || !selectedFile.type.startsWith("image/")) {
-      setError("Only image files (JPG, PNG) are allowed.");
-      return;
-    }
-    setFile(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
-    setError(null);
-    setResult(null);
+import React, { useState } from "react";
+import { FaExclamationTriangle, FaSearch, FaLeaf } from "react-icons/fa";
+
+// Card component
+const Card = ({ title, points, color }) => {
+  const colorClasses = {
+    blue: "bg-blue-50 border-blue-200 text-blue-700",
+    red: "bg-red-50 border-red-200 text-red-700",
+    green: "bg-green-50 border-green-200 text-green-700",
   };
 
-  const handlePrediction = async () => {
-    if (!file) {
-      setError("Please upload an image first.");
+  return (
+    <div className={`p-6 rounded-2xl shadow-md mb-6 border ${colorClasses[color]}`}>
+      <h3 className="font-bold text-xl mb-3">{title}</h3>
+      <ul className="list-disc pl-5 space-y-1">
+        {points.map((p, idx) => (
+          <li key={idx}>{p}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+// Parse AI text into bullet points
+const parseBullets = (text) =>
+  text
+    .split(/\r?\n|•|-/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+const UploadPage = () => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleFileChange = (e) => setSelectedFile(e.target.files[0]);
+
+  const handleSubmit = async () => {
+    if (!selectedFile) {
+      setError("Please select an image");
       return;
     }
+
     setLoading(true);
-    setError(null);
+    setError("");
+    setAnalysis(null);
+
+    const formData = new FormData();
+    formData.append("image", selectedFile);
 
     try {
-      // Convert file to base64
-      const fileToBase64 = (file) =>
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file); // produces base64 with prefix
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = (error) => reject(error);
-        });
-
-      const base64Image = await fileToBase64(file);
-
-      // Send JSON request with base64 image
-      const response = await fetch("https://farmai-h4bm.onrender.com/api/upload", {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64Image }),
+        body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Prediction failed. Try again.");
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong");
 
-      const data = await response.json();
-      const bestMatch = data.predictions?.[0] || { class: "Unknown", confidence: 0 };
-      const confidenceThreshold = 0.5;
+      // Parse bullets dynamically
+      const problemBullets = parseBullets(data.problem || "");
+      const solutionBullets = parseBullets(data.solutions || "");
 
-      setResult({
-        disease: bestMatch.confidence < confidenceThreshold ? "Unknown" : bestMatch.class,
-        confidence:
-          bestMatch.confidence < confidenceThreshold
-            ? "N/A"
-            : (bestMatch.confidence * 100).toFixed(2) + "%",
-        remedies:
-          bestMatch.confidence < confidenceThreshold
-            ? "Cannot provide treatment for unknown images."
-            : "Suggested remedies will be based on the detected disease.",
+      // Split problemBullets into observations & possible issues
+      const mid = Math.ceil(problemBullets.length / 2);
+
+      setAnalysis({
+        leafAnalysis: problemBullets.slice(0, mid),
+        possibleIssues: problemBullets.slice(mid),
+        recommendedActions: solutionBullets,
+        furtherInvestigation: data.furtherInvestigation || [],
+        note: data.note || "",
       });
     } catch (err) {
       setError(err.message);
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDiseaseInfo = async () => {
-    if (!result || result.disease === "Unknown") return;
-    try {
-      setLoading(true);
-      const data = await fetchDiseaseInfoFromAPI(result.disease);
-      setDiseaseInfo(data);
-      setShowPopup(true);
-    } catch (error) {
-      console.error("Error fetching disease info:", error);
-      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center bg-green-100 text-green-800 rounded-full p-3 mb-4">
-            <FaLeaf className="text-xl" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">AI-Powered Crop Health Scanner</h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Upload an image to detect plant diseases and get treatment recommendations
-          </p>
-        </div>
+    <div className="min-h-screen flex flex-col items-center p-6 bg-green-50">
+      <h1 className="text-3xl font-bold text-green-800 mb-6">🌿 Farm Health Scanner</h1>
 
-        {/* Upload & Analyze */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="p-6 sm:p-8">
-            <label className="group cursor-pointer">
-              <div
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
-                  error
-                    ? "border-red-300 bg-red-50"
-                    : "border-green-300 hover:border-green-400 hover:bg-green-50"
-                }`}
-              >
-                <div className="flex flex-col items-center justify-center space-y-3">
-                  <div className="p-4 bg-green-100 rounded-full text-green-600 group-hover:bg-green-200 transition">
-                    <FaUpload className="text-2xl" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-700">
-                      {preview ? "Image ready for analysis" : "Click to upload plant image"}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">{preview ? file.name : "JPEG, PNG (Max 5MB)"}</p>
-                  </div>
-                </div>
-              </div>
-              <input type="file" onChange={handleFileChange} accept="image/*" className="hidden" />
-            </label>
+      <div className="mb-4 w-full max-w-md">
+  <label
+    htmlFor="file-upload"
+    className="cursor-pointer flex items-center justify-center px-4 py-2 border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-100 transition"
+  >
+    <FaLeaf className="mr-2 text-green-600" />
+    {selectedFile ? selectedFile.name : "Choose an image"}
+  </label>
+  <input
+    id="file-upload"
+    type="file"
+    accept="image/*"
+    onChange={handleFileChange}
+    className="hidden"
+  />
+</div>
 
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-start"
-              >
-                <FiX className="flex-shrink-0 mt-0.5 mr-2" />
-                <span>{error}</span>
-              </motion.div>
-            )}
 
-            {preview && (
-              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="mt-6 flex flex-col items-center">
-                <div className="relative w-full max-w-md">
-                  <img src={preview} alt="Plant preview" className="w-full h-auto rounded-lg shadow-md border border-gray-200" />
-                  {loading && (
-                    <div className="absolute inset-0 bg-black bg-opacity-30 rounded-lg flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-                    </div>
-                  )}
-                </div>
+      <button
+        onClick={handleSubmit}
+        disabled={loading}
+        className="mb-6 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+      >
+        {loading ? "Scanning..." : "Scan Field"}
+      </button>
 
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handlePrediction}
-                  disabled={loading}
-                  className={`mt-6 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                    loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 focus:ring-green-500"
-                  }`}
-                >
-                  <FaSearch className="mr-2" />
-                  {loading ? "Analyzing..." : "Detect Disease"}
-                </motion.button>
-              </motion.div>
-            )}
-          </div>
+      {error && <p className="text-red-600 mb-4">{error}</p>}
 
-          {/* Results */}
-          {result && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-gray-50 border-t border-gray-200 p-6 sm:p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <FaLeaf className="text-green-500 mr-2" />
-                Detection Results
-              </h3>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm">
-                  <span className="font-medium text-gray-700">Disease Identified</span>
-                  <span className="font-semibold text-gray-900">{result.disease}</span>
-                </div>
-
-                <div className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm">
-                  <span className="font-medium text-gray-700">Confidence Level</span>
-                  <span className="font-bold text-green-600">{result.confidence}</span>
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={fetchDiseaseInfo}
-                  disabled={loading || result.disease === "Unknown"}
-                  className={`w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                    loading || result.disease === "Unknown"
-                      ? "bg-blue-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-                  }`}
-                >
-                  <FaInfoCircle className="mr-2" />
-                  {loading ? "Loading Details..." : "View Detailed Information"}
-                </motion.button>
-              </div>
-            </motion.div>
+      {analysis && (
+        <div className="w-full max-w-4xl">
+          {/* Leaf Analysis */}
+          {analysis.leafAnalysis.length > 0 && (
+            <Card title="Leaf Analysis" points={analysis.leafAnalysis} color="blue" />
           )}
-        </div>
-      </motion.div>
 
-      {/* Disease Info Popup */}
-      <AnimatePresence>
-        {showPopup && diseaseInfo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={() => setShowPopup(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Popup content */}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* Possible Issues */}
+          {analysis.possibleIssues.length > 0 && (
+            <Card title="Possible Issues" points={analysis.possibleIssues} color="red" />
+          )}
+
+          {/* Further Investigation */}
+          {analysis.furtherInvestigation.length > 0 && (
+            <Card title="Further Investigation" points={analysis.furtherInvestigation} color="blue" />
+          )}
+
+          {/* Recommended Actions */}
+          {analysis.recommendedActions.length > 0 && (
+            <Card title="Recommended Actions" points={analysis.recommendedActions} color="green" />
+          )}
+
+          {/* Note */}
+          {analysis.note && <p className="text-sm text-gray-500 mt-4">{analysis.note}</p>}
+        </div>
+      )}
     </div>
   );
-}
+};
 
-export default UploadDetection;
+export default UploadPage;
