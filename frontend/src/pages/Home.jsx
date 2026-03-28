@@ -43,50 +43,50 @@ const Home = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  const sliderSettings = {
-    dots: true,
-    arrows: false,
-    infinite: true,
-    speed: 600,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    centerMode: true,
-    centerPadding: "24px",
-    responsive: [
-      { breakpoint: 1280, settings: { slidesToShow: 2, centerMode: true } },
-      { breakpoint: 1024, settings: { slidesToShow: 2, centerMode: false } },
-      { breakpoint: 768, settings: { slidesToShow: 1, centerMode: false } },
-    ],
-  };
+  // const sliderSettings = {
+  //   dots: true,
+  //   arrows: false,
+  //   infinite: true,
+  //   speed: 600,
+  //   autoplay: true,
+  //   autoplaySpeed: 4000,
+  //   slidesToShow: 3,
+  //   slidesToScroll: 1,
+  //   centerMode: true,
+  //   centerPadding: "24px",
+  //   responsive: [
+  //     { breakpoint: 1280, settings: { slidesToShow: 2, centerMode: true } },
+  //     { breakpoint: 1024, settings: { slidesToShow: 2, centerMode: false } },
+  //     { breakpoint: 768, settings: { slidesToShow: 1, centerMode: false } },
+  //   ],
+  // };
 
-  const testimonials = [
-    {
-      text:
-        "FarmAI helped me pick the perfect crops for my farm. The insights were spot on.",
-      author: "John Doe",
-      role: "Farmer",
-      avatar:
-        "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M=",
-    },
-    {
-      text:
-        "The fertilizer recommendations boosted my yield by ~30% this season!",
-      author: "Jane Smith",
-      role: "Agri-entrepreneur",
-      avatar:
-        "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M=",
-    },
-    {
-      text:
-        "Disease alerts saved me from major crop loss. Super practical and fast.",
-      author: "Alex Johnson",
-      role: "Co-op Manager",
-      avatar:
-        "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M=",
-    },
-  ];
+  // const testimonials = [
+  //   {
+  //     text:
+  //       "FarmAI helped me pick the perfect crops for my farm. The insights were spot on.",
+  //     author: "John Doe",
+  //     role: "Farmer",
+  //     avatar:
+  //       "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M=",
+  //   },
+  //   {
+  //     text:
+  //       "The fertilizer recommendations boosted my yield by ~30% this season!",
+  //     author: "Jane Smith",
+  //     role: "Agri-entrepreneur",
+  //     avatar:
+  //       "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M=",
+  //   },
+  //   {
+  //     text:
+  //       "Disease alerts saved me from major crop loss. Super practical and fast.",
+  //     author: "Alex Johnson",
+  //     role: "Co-op Manager",
+  //     avatar:
+  //       "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M=",
+  //   },
+  // ];
 
   const faqs = [
     {
@@ -187,11 +187,11 @@ const Home = () => {
             viewport={{ once: true, amount: 0.3 }}
             className="flex justify-center"
           >
-            <div className="relative group">
+            <div className="relative">
               <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-tr from-green-200 to-emerald-200 blur-2xl opacity-60 group-hover:opacity-90 transition" />
               <img
                 src="https://media.istockphoto.com/id/511976070/photo/green-sprouts.jpg?s=612x612&w=0&k=20&c=MzoPpySb-r5bdKui7g8tPWzaZJB6ppVJfKWwWPJIxO8="
-                className="relative z-10 w-64 h-64 sm:w-80 sm:h-80 lg:w-[28rem] lg:h-[28rem] object-cover rounded-[2rem] shadow-2xl ring-1 ring-white/50 border border-white/40 bg-white/40 backdrop-blur-xl transition-transform duration-500 group-hover:-translate-y-1 group-hover:rotate-1"
+                className="relative z-10 w-64 h-64 sm:w-80 sm:h-80 lg:w-[28rem] lg:h-[28rem] object-cover rounded-[2rem] shadow-2xl ring-1 ring-white/50 border border-white/40 bg-white/40 backdrop-blur-xl"
               />
             </div>
           </motion.div>
@@ -316,7 +316,7 @@ const Home = () => {
 </section>
 
 {/* =================== TESTIMONIALS =================== */}
-<section id="reviews" className="snap-section py-16 sm:py-20 bg-green-50">
+{/* <section id="reviews" className="snap-section py-16 sm:py-20 bg-green-50">
   <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10">
     <motion.h3
       initial={{ opacity: 0, y: 18 }}
@@ -369,7 +369,7 @@ const Home = () => {
       </Slider>
     </div>
   </div>
-</section>
+</section> */}
 
       {/* =================== FAQ =================== */}
       <section id="faq" className="snap-section py-20 bg-gradient-to-b from-white to-green-50">

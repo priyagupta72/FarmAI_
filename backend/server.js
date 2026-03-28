@@ -1,675 +1,41 @@
-// import express from "express";
-// import cors from "cors";
-// import bodyParser from "body-parser";
-// import dotenv from "dotenv";
-// import helmet from "helmet";
-// import path from "path";
-// import fs from "fs";
-// import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// // Routes
-// import postRoutes from "./routes/postRoutes.js";
-// import diseaseRoutes from "./routes/diseaseRoutes.js";
-// import diseaseSearchRoutes from "./routes/diseaseSearch_routes.js";
-
-
-// // Load env
-// const envPath = path.resolve(process.cwd(), ".env"); // backend/.env
-// dotenv.config({ path: envPath });
-// console.log("Using .env at:", envPath);
-
-// // MongoDB
-// import mongoose from "mongoose";
-// mongoose.connect(process.env.MONGO_URI, {})
-//   .then(() => console.log("✅ MongoDB connected"))
-//   .catch(err => console.error("❌ MongoDB error:", err));
-
-// const app = express();
-// const PORT = process.env.PORT || 5000;
-
-// // ===== Middleware =====
-// app.use(cors());
-// app.use(bodyParser.json());
-
-// // Serve static files (CSS, JS, images)
-// app.use(express.static(path.join(process.cwd(), "public"))); // put your static files in backend/public
-
-// // Helmet + CSP
-// app.use(
-//   helmet({
-//     contentSecurityPolicy: {
-//       directives: {
-//         defaultSrc: ["'self'"],
-//         styleSrc: ["'self'", "https://fonts.googleapis.com"],
-//         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-//         scriptSrc: ["'self'"],
-//       },
-//     },
-//   })
-// );
-
-// // API routes
-// app.use("/api/diseases", diseaseSearchRoutes);
-// app.use("/api/posts", postRoutes);
-// app.use("/get-disease-info", diseaseRoutes);
-
-// // Google Generative AI
-// const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// if (!GEMINI_API_KEY) {
-//   console.error("❌ GEMINI_API_KEY missing!");
-//   process.exit(1);
-// }
-// const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-// // ===== Routes =====
-
-// // Chatbot
-// app.post("/chat", async (req, res) => {
-//   try {
-//     const { message } = req.body;
-//     if (!message) return res.status(400).json({ reply: "❌ No message provided!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are a plant expert chatbot. Short, clear answers max 20 words.",
-//     });
-
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: message }] }],
-//     });
-
-//     let reply = "";
-//     for await (const chunk of result.stream) {
-//       reply += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ reply: reply.trim() || "Sorry, couldn't process." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ reply: "Error processing request!" });
-//   }
-// });
-
-// // Fertilizer
-// app.post("/fertilizer", async (req, res) => {
-//   try {
-//     const { nitrogen, phosphorous, pottasium, cropname } = req.body;
-//     if (!nitrogen || !phosphorous || !pottasium || !cropname) 
-//       return res.status(400).json({ recommendation: "❌ Missing fields!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are an agronomist. Suggest fertilizer based on N, P, K.",
-//     });
-
-//     const prompt = `Fertilizer for ${cropname} with N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }],
-//     });
-
-//     let recommendation = "";
-//     for await (const chunk of result.stream) {
-//       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ recommendation: recommendation.trim() || "No recommendation." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ recommendation: "⚠️ Something went wrong." });
-//   }
-// });
-
-// // Crop
-// app.post("/crop", async (req, res) => {
-//   try {
-//     const { nitrogen, phosphorous, pottasium, ph, rainfall } = req.body;
-//     if (!nitrogen || !phosphorous || !pottasium || !ph || !rainfall) 
-//       return res.status(400).json({ recommendation: "❌ Missing fields!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are an agronomist. Suggest best crop based on N, P, K, pH, rainfall.",
-//     });
-
-//     const prompt = `Best crop for N=${nitrogen}, P=${phosphorous}, K=${pottasium}, pH=${ph}, rainfall=${rainfall}mm`;
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }],
-//     });
-
-//     let recommendation = "";
-//     for await (const chunk of result.stream) {
-//       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ recommendation: recommendation.trim() || "No recommendation." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ recommendation: "⚠️ Something went wrong." });
-//   }
-// });
-
-// // ===== Start server =====
-// app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
-
-
-
-
-
-
-
-
-// import express from "express";
-// import cors from "cors";
-// import bodyParser from "body-parser";
-// import dotenv from "dotenv";
-// import helmet from "helmet";
-// import path from "path";
-// import { GoogleGenerativeAI } from "@google/generative-ai";
-// import mongoose from "mongoose";
-
-// // ===== Routes =====
-// import postRoutes from "./routes/postRoutes.js";
-// import diseaseRoutes from "./routes/diseaseRoutes.js";
-// import diseaseSearchRoutes from "./routes/diseaseSearch_routes.js";
-// import authRoutes from "./routes/userRoutes.js";
-
-// // ===== Load env =====
-// dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-// console.log("Using .env at:", path.resolve(process.cwd(), ".env"));
-
-// // ===== MongoDB =====
-// mongoose
-//   .connect(process.env.MONGO_URI, {
-//     // ⚠️ these options are deprecated, so you can remove them safely
-//     // useNewUrlParser: true,
-//     // useUnifiedTopology: true,
-//   })
-//   .then(() => console.log("✅ MongoDB connected"))
-//   .catch((err) => console.error("❌ MongoDB connection error:", err));
-
-// // ===== Express App =====
-// const app = express();
-// const PORT = process.env.PORT || 5000;
-
-// // ===== Middleware =====
-// app.use(cors());
-// app.use(bodyParser.json());
-// app.use(express.static(path.join(process.cwd(), "public")));
-
-// app.use(
-//   helmet({
-//     contentSecurityPolicy: {
-//       directives: {
-//         defaultSrc: ["'self'"],
-//         styleSrc: ["'self'", "https://fonts.googleapis.com"],
-//         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-//         scriptSrc: ["'self'"],
-//       },
-//     },
-//   })
-// );
-
-// // ===== API Routes (Standardized) =====
-// app.use("/api", authRoutes);              // ✅ login, register
-// app.use("/api/diseases", diseaseSearchRoutes);
-// app.use("/api/posts", postRoutes);
-// app.use("/api/disease-info", diseaseRoutes);
-
-// // ===== Google Generative AI =====
-// const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// if (!GEMINI_API_KEY) {
-//   console.error("❌ GEMINI_API_KEY missing!");
-//   process.exit(1);
-// }
-// const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-// // ===== Chatbot Endpoint =====
-// app.post("/api/chat", async (req, res) => {
-//   try {
-//     const { message } = req.body;
-//     if (!message) return res.status(400).json({ reply: "❌ No message provided!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are a plant expert chatbot. Short, clear answers max 20 words.",
-//     });
-
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: message }] }],
-//     });
-
-//     let reply = "";
-//     for await (const chunk of result.stream) {
-//       reply += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ reply: reply.trim() || "Sorry, couldn't process." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ reply: "Error processing request!" });
-//   }
-// });
-
-// // ===== Fertilizer Recommendation =====
-// app.post("/api/fertilizer", async (req, res) => {
-//   try {
-//     const { nitrogen, phosphorous, pottasium, cropname } = req.body;
-//     if (!nitrogen || !phosphorous || !pottasium || !cropname)
-//       return res.status(400).json({ recommendation: "❌ Missing fields!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are an agronomist. Suggest fertilizer based on N, P, K.",
-//     });
-
-//     const prompt = `Fertilizer for ${cropname} with N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }],
-//     });
-
-//     let recommendation = "";
-//     for await (const chunk of result.stream) {
-//       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ recommendation: recommendation.trim() || "No recommendation." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ recommendation: "⚠️ Something went wrong." });
-//   }
-// });
-
-// // ===== Crop Recommendation =====
-// app.post("/api/crop", async (req, res) => {
-//   try {
-//     const { nitrogen, phosphorous, pottasium, ph, rainfall } = req.body;
-//     if (!nitrogen || !phosphorous || !pottasium || !ph || !rainfall)
-//       return res.status(400).json({ recommendation: "❌ Missing fields!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are an agronomist. Suggest best crop based on N, P, K, pH, rainfall.",
-//     });
-
-//     const prompt = `Best crop for N=${nitrogen}, P=${phosphorous}, K=${pottasium}, pH=${ph}, rainfall=${rainfall}mm`;
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }],
-//     });
-
-//     let recommendation = "";
-//     for await (const chunk of result.stream) {
-//       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ recommendation: recommendation.trim() || "No recommendation." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ recommendation: "⚠️ Something went wrong." });
-//   }
-// });
-
-// // ===== Start Server =====
-// app.listen(PORT, () => console.log(`✅ Server running at http://localhost:${PORT}`));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import express from "express";
-// import cors from "cors";
-// import bodyParser from "body-parser";
-// import dotenv from "dotenv";
-// import helmet from "helmet";
-// import path from "path";
-// import mongoose from "mongoose";
-// import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// // ===== Routes =====
-// import postRoutes from "./routes/postRoutes.js";
-// import diseaseRoutes from "./routes/diseaseRoutes.js";
-// import diseaseSearchRoutes from "./routes/diseaseSearch_routes.js";
-// import authRoutes from "./routes/userRoutes.js";
-
-// // ===== Load env =====
-// dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-// console.log("Using .env at:", path.resolve(process.cwd(), ".env"));
-
-// // ===== MongoDB =====
-// mongoose
-//   .connect(process.env.MONGO_URI)
-//   .then(() => console.log("✅ MongoDB connected"))
-//   .catch((err) => console.error("❌ MongoDB connection error:", err));
-
-// // ===== Express App =====
-// const app = express();
-// const PORT = process.env.PORT || 5000;
-
-// // ===== Middleware =====
-// // CORS: allow only your frontend
-// app.use(cors({
-//   origin: "https://farmai-2-m5gc.onrender.com", // frontend URL
-//   methods: ["GET", "POST", "PUT", "DELETE"],
-//   credentials: true
-// }));
-
-// app.use(bodyParser.json());
-// app.use(express.static(path.join(process.cwd(), "public")));
-
-// // Helmet: secure headers
-// app.use(helmet({
-//   contentSecurityPolicy: false // disable CSP temporarily for production scripts
-// }));
-
-// // ===== API Routes =====
-// app.use("/api", authRoutes);              // login, register
-// app.use("/api/diseases", diseaseSearchRoutes);
-// app.use("/api/posts", postRoutes);
-// app.use("/api/disease-info", diseaseRoutes);
-
-// // ===== Google Generative AI =====
-// const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// if (!GEMINI_API_KEY) {
-//   console.error("❌ GEMINI_API_KEY missing!");
-//   process.exit(1);
-// }
-// const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-// // ===== Chatbot Endpoint =====
-// app.post("/api/chat", async (req, res) => {
-//   try {
-//     const { message } = req.body;
-//     if (!message) return res.status(400).json({ reply: "❌ No message provided!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are a plant expert chatbot. Short, clear answers max 20 words.",
-//     });
-
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: message }] }],
-//     });
-
-//     let reply = "";
-//     for await (const chunk of result.stream) {
-//       reply += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ reply: reply.trim() || "Sorry, couldn't process." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ reply: "Error processing request!" });
-//   }
-// });
-
-// // ===== Fertilizer Recommendation =====
-// app.post("/api/fertilizer", async (req, res) => {
-//   try {
-//     const { nitrogen, phosphorous, pottasium, cropname } = req.body;
-//     if (!nitrogen || !phosphorous || !pottasium || !cropname)
-//       return res.status(400).json({ recommendation: "❌ Missing fields!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are an agronomist. Suggest fertilizer based on N, P, K.",
-//     });
-
-//     const prompt = `Fertilizer for ${cropname} with N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }],
-//     });
-
-//     let recommendation = "";
-//     for await (const chunk of result.stream) {
-//       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ recommendation: recommendation.trim() || "No recommendation." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ recommendation: "⚠️ Something went wrong." });
-//   }
-// });
-
-// // ===== Crop Recommendation =====
-// app.post("/api/crop", async (req, res) => {
-//   try {
-//     const { nitrogen, phosphorous, pottasium, ph, rainfall } = req.body;
-//     if (!nitrogen || !phosphorous || !pottasium || !ph || !rainfall)
-//       return res.status(400).json({ recommendation: "❌ Missing fields!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are an agronomist. Suggest best crop based on N, P, K, pH, rainfall.",
-//     });
-
-//     const prompt = `Best crop for N=${nitrogen}, P=${phosphorous}, K=${pottasium}, pH=${ph}, rainfall=${rainfall}mm`;
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }],
-//     });
-
-//     let recommendation = "";
-//     for await (const chunk of result.stream) {
-//       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ recommendation: recommendation.trim() || "No recommendation." });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ recommendation: "⚠️ Something went wrong." });
-//   }
-// });
-
-// // ===== Start Server =====
-// app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
-
-
-
-
-
-
-
-
-
-
-
-
-// import express from "express";
-// import cors from "cors";
-// import bodyParser from "body-parser";
-// import dotenv from "dotenv";
-// import helmet from "helmet";
-// import path from "path";
-// import mongoose from "mongoose";
-// import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// // ===== Routes =====
-// import postRoutes from "./routes/postRoutes.js";
-// import diseaseRoutes from "./routes/diseaseRoutes.js";
-// import diseaseSearchRoutes from "./routes/diseaseSearch_routes.js";
-// import authRoutes from "./routes/userRoutes.js";
-
-// // ===== Load .env =====
-// dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-// console.log("🌱 Using .env from:", path.resolve(process.cwd(), ".env"));
-
-// // ===== MongoDB Connection =====
-// mongoose
-//   .connect(process.env.MONGO_URI)
-//   .then(() => console.log("✅ MongoDB connected"))
-//   .catch((err) => {
-//     console.error("❌ MongoDB connection error:", err.message);
-//     process.exit(1);
-//   });
-
-// // ===== Initialize Express =====
-// const app = express();
-// const PORT = process.env.PORT || 5000;
-
-// // ===== Middleware =====
-// app.use(cors({
-//   origin: process.env.FRONTEND_URL || "*", // Default: allow all (only for testing)
-//   methods: ["GET", "POST", "PUT", "DELETE"],
-//   credentials: true
-// }));
-
-// app.use(bodyParser.json());
-// app.use(express.static(path.join(process.cwd(), "public")));
-
-// app.use(helmet({
-//   contentSecurityPolicy: false
-// }));
-
-// // ===== API Routes =====
-// app.use("/api", authRoutes);
-// app.use("/api/diseases", diseaseSearchRoutes);
-// app.use("/api/posts", postRoutes);
-// app.use("/api/disease-info", diseaseRoutes);
-
-// // ===== Google Gemini Setup =====
-// const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// if (!GEMINI_API_KEY) {
-//   console.error("❌ GEMINI_API_KEY is missing!");
-//   process.exit(1);
-// }
-// const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-// // ===== Chatbot Endpoint =====
-// app.post("/api/chat", async (req, res) => {
-//   try {
-//     const { message } = req.body;
-//     if (!message) return res.status(400).json({ reply: "❌ No message provided!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are a plant expert chatbot. Short, clear answers max 20 words."
-//     });
-
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: message }] }]
-//     });
-
-//     let reply = "";
-//     for await (const chunk of result.stream) {
-//       reply += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ reply: reply.trim() || "Sorry, couldn't process." });
-//   } catch (err) {
-//     console.error("❌ Chatbot error:", err);
-//     res.status(500).json({ reply: "Error processing request!" });
-//   }
-// });
-
-// // ===== Fertilizer Recommendation Endpoint =====
-// app.post("/api/fertilizer", async (req, res) => {
-//   try {
-//     const { nitrogen, phosphorous, pottasium, cropname } = req.body;
-//     if (!nitrogen || !phosphorous || !pottasium || !cropname)
-//       return res.status(400).json({ recommendation: "❌ Missing fields!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are an agronomist. Suggest fertilizer based on N, P, K."
-//     });
-
-//     const prompt = `Fertilizer for ${cropname} with N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }]
-//     });
-
-//     let recommendation = "";
-//     for await (const chunk of result.stream) {
-//       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ recommendation: recommendation.trim() || "No recommendation." });
-//   } catch (err) {
-//     console.error("❌ Fertilizer API error:", err);
-//     res.status(500).json({ recommendation: "⚠️ Something went wrong." });
-//   }
-// });
-
-// // ===== Crop Recommendation Endpoint =====
-// app.post("/api/crop", async (req, res) => {
-//   try {
-//     const { nitrogen, phosphorous, pottasium, ph, rainfall } = req.body;
-//     if (!nitrogen || !phosphorous || !pottasium || !ph || !rainfall)
-//       return res.status(400).json({ recommendation: "❌ Missing fields!" });
-
-//     const model = genAI.getGenerativeModel({
-//       model: "gemini-1.5-flash",
-//       systemInstruction: "You are an agronomist. Suggest best crop based on N, P, K, pH, rainfall."
-//     });
-
-//     const prompt = `Best crop for N=${nitrogen}, P=${phosphorous}, K=${pottasium}, pH=${ph}, rainfall=${rainfall}mm`;
-//     const result = await model.generateContentStream({
-//       contents: [{ role: "user", parts: [{ text: prompt }] }]
-//     });
-
-//     let recommendation = "";
-//     for await (const chunk of result.stream) {
-//       recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-//     }
-
-//     res.json({ recommendation: recommendation.trim() || "No recommendation." });
-//   } catch (err) {
-//     console.error("❌ Crop API error:", err);
-//     res.status(500).json({ recommendation: "⚠️ Something went wrong." });
-//   }
-// });
-
-// // ===== Start Server =====
-// app.listen(PORT, () => {
-//   console.log(`✅ Server running on port ${PORT}`);
-// });
-
-
-
-
-
-
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
+import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import path from "path";
 import mongoose from "mongoose";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
+import logger from './logs/logger.js'
 import predictRoutes from "./routes/predictRoutes.js";
-
-// ===== Routes =====
 import postRoutes from "./routes/postRoutes.js";
 import diseaseRoutes from "./routes/diseaseRoutes.js";
 import diseaseSearchRoutes from "./routes/diseaseSearch_routes.js";
 import authRoutes from "./routes/userRoutes.js";
 
-
 // ===== Load .env =====
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-console.log("🌱 Using .env from:", path.resolve(process.cwd(), ".env"));
+
+// ===== Validate Required Env Vars =====
+const REQUIRED_ENV = ["MONGO_URI", "JWT_SECRET"];
+REQUIRED_ENV.forEach((key) => {
+  if (!process.env[key]) {
+    logger.error(`Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+});
+
+if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) {
+  logger.error("At least one AI API key (GROQ_API_KEY or OPENROUTER_API_KEY) is required.");
+  process.exit(1);
+}
 
 // ===== MongoDB Connection =====
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
+  .then(() => logger.info("MongoDB connected"))
   .catch((err) => {
-    console.error("❌ MongoDB connection error:", err.message);
+    logger.error("MongoDB connection failed", { error: err.message });
     process.exit(1);
   });
 
@@ -677,19 +43,49 @@ mongoose
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ===== Middleware =====
+// ===== Security Middleware =====
+app.use(helmet({ contentSecurityPolicy: false }));
+
+const ALLOWED_ORIGINS = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://localhost:3000",
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "*", // Default: allow all (only for testing)
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error("Not allowed by CORS"));
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  credentials: true,
 }));
 
-app.use(bodyParser.json());
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(express.static(path.join(process.cwd(), "public")));
 
-app.use(helmet({
-  contentSecurityPolicy: false
-}));
+// ===== Rate Limiters =====
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: "Too many attempts. Please try again after 15 minutes." },
+});
+
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: "Too many requests. Please slow down." },
+});
+
+// ===== Auth Rate Limiting =====
+app.use("/api/register", authLimiter);
+app.use("/api/login", authLimiter);
 
 // ===== API Routes =====
 app.use("/api", authRoutes);
@@ -698,150 +94,161 @@ app.use("/api/posts", postRoutes);
 app.use("/api/disease-info", diseaseRoutes);
 app.use("/api/upload", predictRoutes);
 
-// ===== Google Gemini Setup =====
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-if (!GEMINI_API_KEY) {
-  console.error("❌ GEMINI_API_KEY is missing!");
-  process.exit(1);
-}
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+// ===== AI Clients =====
+const groq = process.env.GROQ_API_KEY
+  ? new Groq({ apiKey: process.env.GROQ_API_KEY })
+  : null;
+
+// ===== AI Helper: Groq → OpenRouter =====
+export const getAIResponse = async (systemInstruction, prompt) => {
+
+  // ── 1. Try Groq (primary, free) ──
+  if (groq) {
+    try {
+      const completion = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user",   content: prompt },
+        ],
+        max_tokens: 1024,
+      });
+      logger.info("AI response from Groq");
+      return completion.choices[0].message.content.trim();
+    } catch (err) {
+      logger.warn("Groq failed: " + err.message);
+    }
+  }
+
+  // ── 2. Fallback to OpenRouter (free models) ──
+  if (process.env.OPENROUTER_API_KEY) {
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "meta-llama/llama-3.3-70b-instruct:free", // free model
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user",   content: prompt },
+          ],
+          max_tokens: 1024,
+        }),
+      });
+      const data = await response.json();
+      if (data.choices?.[0]?.message?.content) {
+        logger.info("AI response from OpenRouter (fallback)");
+        return data.choices[0].message.content.trim();
+      }
+      throw new Error("Empty response from OpenRouter");
+    } catch (err) {
+      logger.error("OpenRouter failed: " + err.message);
+      throw new Error("All AI providers failed.");
+    }
+  }
+
+  throw new Error("No AI provider configured.");
+};
 
 // ===== Chatbot Endpoint =====
-app.post("/api/chat", async (req, res) => {
+app.post("/api/chat", aiLimiter, async (req, res) => {
+  const { message } = req.body;
+  if (!message || typeof message !== "string" || !message.trim()) {
+    return res.status(400).json({ reply: "Message is required." });
+  }
   try {
-    const { message } = req.body;
-    if (!message) return res.status(400).json({ reply: "❌ No message provided!" });
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: "You are a plant expert chatbot. Short, clear answers max 20 words."
-    });
-
-    const result = await model.generateContentStream({
-      contents: [{ role: "user", parts: [{ text: message }] }]
-    });
-
-    let reply = "";
-    for await (const chunk of result.stream) {
-      reply += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    }
-
-    res.json({ reply: reply.trim() || "Sorry, couldn't process." });
+    const reply = await getAIResponse(
+      "You are a plant expert chatbot. Short, clear answers max 20 words.",
+      message.trim().slice(0, 500)
+    );
+    return res.json({ reply: reply || "Sorry, couldn't process your request." });
   } catch (err) {
-    console.error("❌ Chatbot error:", err);
-    res.status(500).json({ reply: "Error processing request!" });
+    logger.error("Chatbot endpoint error", { error: err.message, stack: err.stack });
+    return res.status(500).json({ reply: "Error processing request." });
   }
 });
 
-// ===== Fertilizer Recommendation Endpoint (Improved) =====
-app.post("/api/fertilizer", async (req, res) => {
+// ===== Fertilizer Recommendation Endpoint =====
+app.post("/api/fertilizer", aiLimiter, async (req, res) => {
+  const { nitrogen, phosphorous, pottasium, cropname } = req.body;
+  if (nitrogen === undefined || phosphorous === undefined ||
+      pottasium === undefined || !cropname || !cropname.trim()) {
+    return res.status(400).json({ recommendation: "All fields are required." });
+  }
+  if (nitrogen < 0 || nitrogen > 100)
+    return res.status(400).json({ recommendation: "Nitrogen must be between 0 and 100." });
+  if (phosphorous < 0 || phosphorous > 100)
+    return res.status(400).json({ recommendation: "Phosphorous must be between 0 and 100." });
+  if (pottasium < 0 || pottasium > 100)
+    return res.status(400).json({ recommendation: "Potassium must be between 0 and 100." });
+
   try {
-    const { nitrogen, phosphorous, pottasium, cropname } = req.body;
-
-    // ===== Backend Validation =====
-    if (
-      nitrogen === undefined || phosphorous === undefined ||
-      pottasium === undefined || !cropname || cropname.trim() === ""
-    ) {
-      return res.status(400).json({ recommendation: "Missing fields!" });
-    }
-
-    if (nitrogen < 0 || nitrogen > 100) return res.status(400).json({ recommendation: "Invalid Nitrogen value!" });
-    if (phosphorous < 0 || phosphorous > 100) return res.status(400).json({ recommendation: "Invalid Phosphorous value!" });
-    if (pottasium < 0 || pottasium > 100) return res.status(400).json({ recommendation: "Invalid Potassium value!" });
-
-   // ===== AI Model Setup =====
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-  systemInstruction: `
-    You are an expert agronomist.
-    For the given crop and NPK values:
-    1. Provide Fertilizer/Product name.
-    2. Provide Dosage per acre/hectare in plain text.
-    3. Provide Instructions in plain text ONLY, concise and actionable.
-       - Include when to apply and how to apply.
-       - Do NOT add any *, -, bullets, or markdown symbols.
-       - Do NOT repeat the word "Instructions" inside the content.
-    Output MUST exactly match:
-    Fertilizer: [name]
-    Dosage: [dosage]
-    Instructions: [instructions]
-  `
-});
-
-
-
-
-    const prompt = `Crop: ${cropname}, N=${nitrogen}, P=${phosphorous}, K=${pottasium}`;
-    const result = await model.generateContentStream({
-      contents: [{ role: "user", parts: [{ text: prompt }] }]
-    });
-
-    let recommendation = "";
-    for await (const chunk of result.stream) {
-      recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    }
-
-    res.json({ recommendation: recommendation.trim() || "No recommendation available." });
+    const recommendation = await getAIResponse(
+      `You are an expert agronomist.
+      For the given crop and NPK values:
+      1. Provide Fertilizer/Product name.
+      2. Provide Dosage per acre/hectare in plain text.
+      3. Provide Instructions in plain text ONLY, concise and actionable.
+         - Include when to apply and how to apply.
+         - Do NOT add any *, -, bullets, or markdown symbols.
+         - Do NOT repeat the word "Instructions" inside the content.
+      Output MUST exactly match:
+      Fertilizer: [name]
+      Dosage: [dosage]
+      Instructions: [instructions]`,
+      `Crop: ${cropname.trim()}, N=${nitrogen}, P=${phosphorous}, K=${pottasium}`
+    );
+    return res.json({ recommendation: recommendation || "No recommendation available." });
   } catch (err) {
-    console.error("Fertilizer API error:", err);
-    res.status(500).json({ recommendation: "Something went wrong." });
+    logger.error("Fertilizer endpoint error", { error: err.message, stack: err.stack });
+    return res.status(500).json({ recommendation: "Something went wrong. Please try again." });
   }
 });
 
+// ===== Crop Recommendation Endpoint =====
+app.post("/api/crop", aiLimiter, async (req, res) => {
+  const { nitrogen, phosphorous, pottasium, ph, rainfall } = req.body;
+  if (nitrogen === undefined || phosphorous === undefined ||
+      pottasium === undefined || ph === undefined || rainfall === undefined) {
+    return res.status(400).json({ recommendation: "All fields are required." });
+  }
+  if (nitrogen < 0 || nitrogen > 100)
+    return res.status(400).json({ recommendation: "Nitrogen must be between 0 and 100." });
+  if (phosphorous < 0 || phosphorous > 100)
+    return res.status(400).json({ recommendation: "Phosphorous must be between 0 and 100." });
+  if (pottasium < 0 || pottasium > 100)
+    return res.status(400).json({ recommendation: "Potassium must be between 0 and 100." });
+  if (ph < 0 || ph > 14)
+    return res.status(400).json({ recommendation: "pH must be between 0 and 14." });
+  if (rainfall < 0 || rainfall > 5000)
+    return res.status(400).json({ recommendation: "Rainfall must be between 0 and 5000 mm." });
 
-
-app.post("/api/crop", async (req, res) => {
   try {
-    const { nitrogen, phosphorous, pottasium, ph, rainfall } = req.body;
-
-    // ===== Backend Validation =====
-    if (
-      nitrogen === undefined || phosphorous === undefined ||
-      pottasium === undefined || ph === undefined ||
-      rainfall === undefined
-    ) {
-      return res.status(400).json({ recommendation: "Missing fields!" });
-    }
-
-    if (nitrogen < 0 || nitrogen > 100) return res.status(400).json({ recommendation: "Invalid Nitrogen value!" });
-    if (phosphorous < 0 || phosphorous > 100) return res.status(400).json({ recommendation: "Invalid Phosphorous value!" });
-    if (pottasium < 0 || pottasium > 100) return res.status(400).json({ recommendation: "Invalid Potassium value!" });
-    if (ph < 0 || ph > 7) return res.status(400).json({ recommendation: "Invalid pH value!" });
-    if (rainfall < 0 || rainfall > 5000) return res.status(400).json({ recommendation: "Invalid Rainfall value!" });
-
-    // Proceed with AI model
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: "You are an agronomist. Suggest best crop based on N, P, K, pH, rainfall."
-    });
-
-    const prompt = `Best crop for N=${nitrogen}, P=${phosphorous}, K=${pottasium}, pH=${ph}, rainfall=${rainfall}mm`;
-    const result = await model.generateContentStream({
-      contents: [{ role: "user", parts: [{ text: prompt }] }]
-    });
-
-    let recommendation = "";
-    for await (const chunk of result.stream) {
-      recommendation += chunk.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    }
-
-    res.json({ recommendation: recommendation.trim() || "No recommendation." });
+    const recommendation = await getAIResponse(
+      "You are an agronomist. Suggest best crop based on N, P, K, pH, rainfall.",
+      `Best crop for N=${nitrogen}, P=${phosphorous}, K=${pottasium}, pH=${ph}, rainfall=${rainfall}mm`
+    );
+    return res.json({ recommendation: recommendation || "No recommendation available." });
   } catch (err) {
-    console.error("Crop API error:", err);
-    res.status(500).json({ recommendation: "Something went wrong." });
+    logger.error("Crop endpoint error", { error: err.message, stack: err.stack });
+    return res.status(500).json({ recommendation: "Something went wrong. Please try again." });
   }
 });
 
-
-// ===== Start Server =====
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// ===== Global Error Handler =====
+app.use((err, req, res, next) => {
+  logger.error("Unhandled error", { error: err.message, stack: err.stack, path: req.path });
+  res.status(500).json({ success: false, message: "An unexpected error occurred." });
 });
 
-// Serve React build folder
+// ===== Serve React Build =====
 app.use(express.static(path.join(process.cwd(), "frontend/build")));
-
 app.get("*", (req, res) => {
   res.sendFile(path.join(process.cwd(), "frontend/build", "index.html"));
 });
+
+// ===== Start Server =====
+app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));

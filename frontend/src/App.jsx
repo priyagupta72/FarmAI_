@@ -19,6 +19,7 @@ import './App.css';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import HomeBeforeLogIn from './pages/HomeBeforeLogIn';
+import DiseaseDetail from "./pages/DiseaseDetail";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -48,6 +49,7 @@ const App = () => {
 
           <Route path="/upload" element={<UploadDetection />} />
           <Route path="/diseases" element={<DiseaseInfo />} />
+          <Route path="/diseases/:id" element={<DiseaseDetail />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/crop" element={<CropPage />} />
           <Route path="/fertilizer" element={<FertilizerPage />} />

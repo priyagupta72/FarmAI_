@@ -397,9 +397,9 @@ const Home = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20, scale: 0.98 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.7, ease: "easeOut" }} viewport={{ once: true, amount: 0.3 }} className="flex justify-center">
-            <div className="relative group">
+            <div className="relative">
               <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-tr from-green-200 to-emerald-200 blur-2xl opacity-60 group-hover:opacity-90 transition" />
-              <img src="https://media.istockphoto.com/id/511976070/photo/green-sprouts.jpg?s=612x612&w=0&k=20&c=MzoPpySb-r5bdKui7g8tPWzaZJB6ppVJfKWwWPJIxO8=" className="relative z-10 w-64 h-64 sm:w-80 sm:h-80 lg:w-[28rem] lg:h-[28rem] object-cover rounded-[2rem] shadow-2xl ring-1 ring-white/50 border border-white/40 bg-white/40 backdrop-blur-xl transition-transform duration-500 group-hover:-translate-y-1 group-hover:rotate-1"/>
+              <img src="https://media.istockphoto.com/id/511976070/photo/green-sprouts.jpg?s=612x612&w=0&k=20&c=MzoPpySb-r5bdKui7g8tPWzaZJB6ppVJfKWwWPJIxO8=" className="relative z-10 w-64 h-64 sm:w-80 sm:h-80 lg:w-[28rem] lg:h-[28rem] object-cover rounded-[2rem] shadow-2xl ring-1 ring-white/50 border border-white/40 bg-white/40 backdrop-blur-xl transition-transform duration-500 "/>
             </div>
           </motion.div>
         </div>

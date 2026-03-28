@@ -5,64 +5,92 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// ===== Register =====
-router.post("/register", async (req, res) => {
-  let { firstName, lastName, email, password } = req.body;
+// ─── Validation ───────────────────────────────────────────────────────────────
 
-  // Trim inputs
-  firstName = firstName?.trim();
-  lastName = lastName?.trim();
-  email = email?.trim().toLowerCase();
-  password = password?.trim();
+const NAME_REGEX = /^[a-zA-Z\s'-]{2,50}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,72}$/;
 
-  // Validate input
-  if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({ success: false, message: "All fields are required" });
-  }
+const validateRegister = (data) => {
+  const errors = [];
 
-  try {
-    // Check if email already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: "Email already registered" });
-    }
+  if (!data.firstName || !NAME_REGEX.test(data.firstName))
+    errors.push("First name must be 2–50 letters only.");
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+  if (!data.lastName || !NAME_REGEX.test(data.lastName))
+    errors.push("Last name must be 2–50 letters only.");
 
-    // Create user
-    const user = new User({ firstName, lastName, email, password: hashedPassword });
-    await user.save();
+  if (!data.email || !EMAIL_REGEX.test(data.email))
+    errors.push("Please enter a valid email address.");
 
-    res.status(201).json({ success: true, message: "Registration successful" });
-  } catch (err) {
-    console.error("Signup error:", err);
-    res.status(500).json({ success: false, message: "Server error: " + err.message });
-  }
+  if (!data.password || !PASSWORD_REGEX.test(data.password))
+    errors.push(
+      "Password must be 8–72 characters and include uppercase, lowercase, a number, and a special character (@$!%*?&)."
+    );
+
+  return errors;
+};
+
+const validateLogin = (data) => {
+  const errors = [];
+  if (!data.email || !EMAIL_REGEX.test(data.email?.trim()))
+    errors.push("Please enter a valid email address.");
+  if (!data.password || data.password.trim().length < 1)
+    errors.push("Password is required.");
+  return errors;
+};
+
+// ─── Sanitize ─────────────────────────────────────────────────────────────────
+
+const sanitizeRegisterBody = (body) => ({
+  firstName: body.firstName?.trim().slice(0, 50),
+  lastName: body.lastName?.trim().slice(0, 50),
+  email: body.email?.trim().toLowerCase().slice(0, 254),
+  password: body.password?.trim().slice(0, 72),
 });
 
-// ===== Login =====
-router.post("/login", async (req, res) => {
-  let { email, password } = req.body;
+const sanitizeLoginBody = (body) => ({
+  email: body.email?.trim().toLowerCase().slice(0, 254),
+  password: body.password?.trim().slice(0, 72),
+});
 
-  email = email?.trim().toLowerCase();
-  password = password?.trim();
+// ─── Register ─────────────────────────────────────────────────────────────────
 
-  if (!email || !password) {
-    return res.status(400).json({ success: false, message: "All fields required" });
+router.post("/register", async (req, res) => {
+  const sanitized = sanitizeRegisterBody(req.body);
+  const errors = validateRegister(sanitized);
+
+  if (errors.length > 0) {
+    return res.status(422).json({ success: false, message: errors[0], errors });
   }
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ success: false, message: "Invalid credentials" });
+    const exists = await User.findOne({ email: sanitized.email }).lean();
+    if (exists) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists.",
+      });
+    }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ success: false, message: "Invalid credentials" });
+    const hashedPassword = await bcrypt.hash(sanitized.password, 12);
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const user = await User.create({
+      firstName: sanitized.firstName,
+      lastName: sanitized.lastName,
+      email: sanitized.email,
+      password: hashedPassword,
+    });
 
-    res.json({
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d", algorithm: "HS256" }
+    );
+
+    return res.status(201).json({
       success: true,
+      message: "Account created successfully.",
       token,
       user: {
         id: user._id,
@@ -72,8 +100,66 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ success: false, message: "Server error: " + err.message });
+    // Mongoose duplicate key (race condition safety)
+    if (err.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists.",
+      });
+    }
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    });
+  }
+});
+
+// ─── Login ────────────────────────────────────────────────────────────────────
+
+router.post("/login", async (req, res) => {
+  const sanitized = sanitizeLoginBody(req.body);
+  const errors = validateLogin(sanitized);
+
+  if (errors.length > 0) {
+    return res.status(422).json({ success: false, message: errors[0], errors });
+  }
+
+  try {
+    const user = await User.findOne({ email: sanitized.email }).select("+password");
+
+    // Use constant-time comparison even for non-existent users (prevents timing attacks)
+    const dummyHash = "$2a$12$invalidsaltthatisexactly22chars..invalid";
+    const passwordToCheck = user ? user.password : dummyHash;
+    const isMatch = await bcrypt.compare(sanitized.password, passwordToCheck);
+
+    if (!user || !isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password.",
+      });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d", algorithm: "HS256" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
+    });
+  } catch {
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again later.",
+    });
   }
 });
 

@@ -25,7 +25,7 @@ const ChatPopup = ({ onClose }) => {
 
     try {
       const response = await fetch(
-        "https://ai-based-crop-disease.onrender.com/chat",
+  `${import.meta.env.VITE_BACKEND_URL}/api/chat`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
