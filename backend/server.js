@@ -86,6 +86,7 @@ const aiLimiter = rateLimit({
 // ===== Auth Rate Limiting =====
 app.use("/api/register", authLimiter);
 app.use("/api/login", authLimiter);
+app.use("/api/reset-password", authLimiter);
 
 // ===== API Routes =====
 app.use("/api", authRoutes);

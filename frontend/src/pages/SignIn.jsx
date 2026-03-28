@@ -1,225 +1,206 @@
-// import React, { useState } from "react";
-// import { useNavigate, Link } from "react-router-dom";
-
-// const SignIn = () => {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const navigate = useNavigate();
-
-//   const handleLogin = async (e) => {
-//     e.preventDefault();
-
-//     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-    
-//     try {
-//      const response = await fetch(`${BACKEND_URL}/api/login`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ email, password }),
-//       });
-
-//       const data = await response.json();
-//       if (data.success) {
-//         // ✅ Save token in localStorage
-//         localStorage.setItem("token", data.token);
-
-//         alert("Login successful!");
-//         navigate("/home"); // ✅ Redirect to homepage
-//       } else {
-//         alert(data.message);
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       alert("Login failed!");
-//     }
-//   };
-
-//   return (
-//     <div style={styles.body}>
-//       <div style={styles.formContainer}>
-//         <h2 style={styles.heading}>Sign In</h2>
-//         <form onSubmit={handleLogin} style={styles.form}>
-//           <input
-//             type="email"
-//             placeholder="Email"
-//             value={email}
-//             onChange={(e) => setEmail(e.target.value)}
-//             required
-//             style={styles.input}
-//           />
-//           <input
-//             type="password"
-//             placeholder="Password"
-//             value={password}
-//             onChange={(e) => setPassword(e.target.value)}
-//             required
-//             style={styles.input}
-//           />
-//           <button type="submit" style={styles.button}>
-//             Log In
-//           </button>
-//         </form>
-//         <p style={styles.text}>
-//   Don't have an account?{" "}
-//   <Link to="/register" style={styles.link}>
-//     Sign Up
-//   </Link>
-// </p>
-//       </div>
-//     </div>
-//   );
-// };
-
-// const styles = {
-//   body: {
-//     fontFamily: "Arial, sans-serif",
-//     backgroundImage: 'url("/images/bg.jpg")',
-//     backgroundRepeat: "no-repeat",
-//     backgroundPosition: "center",
-//     backgroundSize: "cover",
-//     height: "100vh",
-//     display: "flex",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     margin: 0,
-//   },
-//   formContainer: {
-//     width: "360px",
-//     background: "rgba(255, 255, 255, 0.05)",
-//     backdropFilter: "blur(12px)",
-//     borderRadius: "15px",
-//     padding: "40px 30px",
-//     boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
-//     textAlign: "center",
-//     display: "flex",
-//     flexDirection: "column",
-//     alignItems: "center",
-//     animation: "fadeIn 0.8s ease",
-//   },
-//   heading: { marginBottom: "20px", color: "#000" },
-//   form: { width: "100%" },
-//   input: {
-//     width: "100%",
-//     maxWidth: "300px",
-//     padding: "12px 15px",
-//     margin: "12px 0",
-//     borderRadius: "10px",
-//     border: "2px solid rgba(0,0,0,0.4)",
-//     background: "rgba(255,255,255,0.1)",
-//     color: "#000",
-//     fontSize: "16px",
-//   },
-//   button: {
-//     background: "#4CAF50",
-//     color: "white",
-//     width: "100%",
-//     maxWidth: "335px",
-//     padding: "12px 15px",
-//     border: "none",
-//     borderRadius: "10px",
-//     cursor: "pointer",
-//     fontSize: "16px",
-//     marginTop: "20px",
-//     transition: "background 0.3s ease",
-//   },
-//   text: { marginTop: "15px", color: "#000" },
-//   link: { color: "#4CAF50", textDecoration: "none" },
-// };
-
-// export default SignIn;
-
-
-
-
-
-
-
-
-
-
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
+
+// ─── Validators ───────────────────────────────────────────────────────────────
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+const fieldValidators = {
+  email: (v) =>
+    !v ? "Email is required." : !EMAIL_REGEX.test(v) ? "Enter a valid email address." : "",
+  password: (v) => (!v ? "Password is required." : ""),
+};
+
+const INITIAL_FORM = { email: "", password: "" };
+const INITIAL_ERRORS = { email: "", password: "" };
+
+// ─── Spinner keyframe (injected once) ─────────────────────────────────────────
+if (!document.getElementById("__si-spin")) {
+  const s = document.createElement("style");
+  s.id = "__si-spin";
+  s.textContent = `@keyframes __si_spin { to { transform: rotate(360deg); } }`;
+  document.head.appendChild(s);
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const SignIn = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [fieldErrors, setFieldErrors] = useState(INITIAL_ERRORS);
+  const [touched, setTouched] = useState({});
+  const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      if (touched[name]) {
+        setFieldErrors((prev) => ({ ...prev, [name]: fieldValidators[name](value) }));
+      }
+      setServerError("");
+    },
+    [touched]
+  );
+
+  const handleBlur = useCallback((e) => {
+    const { name, value } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    setFieldErrors((prev) => ({ ...prev, [name]: fieldValidators[name](value) }));
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
 
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    const allTouched = Object.keys(INITIAL_FORM).reduce((acc, k) => ({ ...acc, [k]: true }), {});
+    setTouched(allTouched);
+    const allErrors = Object.keys(fieldValidators).reduce(
+      (acc, k) => ({ ...acc, [k]: fieldValidators[k](formData[k]) }),
+      {}
+    );
+    setFieldErrors(allErrors);
+    if (Object.values(allErrors).some(Boolean)) return;
+
+    setLoading(true);
+    setServerError("");
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/login`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
       const data = await response.json();
-      setLoading(false);
 
       if (data.success) {
         localStorage.setItem("token", data.token);
-        alert("Login successful!");
-        navigate("/"); // ✅ Navigate to Home page
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/");
       } else {
-        setError(data.message || "Login failed.");
+        setServerError(data.message || "Login failed. Please try again.");
       }
-    } catch (err) {
-      console.error(err);
-      setError("Server error. Please try again later.");
+    } catch {
+      setServerError("Unable to connect. Please check your internet and try again.");
+    } finally {
       setLoading(false);
     }
+  };
+
+  // Dynamic border color per field
+  const inputBorder = (name) => {
+    if (fieldErrors[name]) return "2px solid #ef4444";
+    if (touched[name] && !fieldErrors[name] && formData[name]) return "2px solid #4CAF50";
+    return "2px solid rgba(0,0,0,0.4)";
   };
 
   return (
     <div style={styles.body}>
       <div style={styles.formContainer}>
         <h2 style={styles.heading}>Sign In</h2>
-        <form onSubmit={handleLogin} style={styles.form}>
+
+        <form onSubmit={handleSubmit} style={styles.form} noValidate>
+
+          {/* Email */}
           <input
             type="email"
+            name="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={styles.input}
+            value={formData.email}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            autoComplete="email"
+            style={{ ...styles.input, border: inputBorder("email") }}
+            aria-invalid={!!fieldErrors.email}
           />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={styles.input}
-          />
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? "Logging in..." : "Log In"}
+          {fieldErrors.email && (
+            <p style={styles.fieldError} role="alert">{fieldErrors.email}</p>
+          )}
+
+          {/* Password */}
+          <div style={styles.passwordWrap}>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              autoComplete="current-password"
+              style={{
+                ...styles.input,
+                margin: 0,
+                width: "100%",
+                maxWidth: "100%",
+                paddingRight: "44px",
+                border: inputBorder("password"),
+              }}
+              aria-invalid={!!fieldErrors.password}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              style={styles.eyeBtn}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+                  <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              )}
+            </button>
+          </div>
+          {fieldErrors.password && (
+            <p style={styles.fieldError} role="alert">{fieldErrors.password}</p>
+          )}
+          <div style={{ width: "100%", maxWidth: "300px", textAlign: "right", marginTop: "4px" }}>
+  <Link to="/forgot-password" style={{ ...styles.link, fontSize: "13px" }}>
+    Forgot password?
+  </Link>
+</div>
+
+          {/* Server error */}
+          {serverError && (
+            <p style={styles.serverError} role="alert">{serverError}</p>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            style={{ ...styles.button, opacity: loading ? 0.75 : 1, cursor: loading ? "not-allowed" : "pointer" }}
+            disabled={loading}
+            aria-busy={loading}
+          >
+            {loading ? (
+              <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                <span style={styles.spinner} aria-hidden="true" />
+                Logging in...
+              </span>
+            ) : (
+              "Log In"
+            )}
           </button>
         </form>
-        {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+
         <p style={{ marginTop: "15px" }}>
           Don't have an account?{" "}
-          <Link to="/register" style={styles.link}>
-            Sign Up
-          </Link>
+          <Link to="/register" style={styles.link}>Sign Up</Link>
         </p>
       </div>
     </div>
   );
 };
 
-
+// ─── Styles (identical to SignUp) ─────────────────────────────────────────────
 
 const styles = {
   body: {
@@ -252,12 +233,54 @@ const styles = {
     width: "100%",
     maxWidth: "300px",
     padding: "12px 15px",
-    margin: "12px 0",
+    margin: "12px 0 0 0",
     borderRadius: "10px",
     border: "2px solid rgba(0,0,0,0.4)",
     background: "rgba(255,255,255,0.1)",
     color: "#000",
     fontSize: "16px",
+    boxSizing: "border-box",
+    transition: "border-color 0.2s",
+    outline: "none",
+  },
+  passwordWrap: {
+    position: "relative",
+    width: "100%",
+    maxWidth: "300px",
+    margin: "12px auto 0",
+    display: "flex",
+    alignItems: "center",
+  },
+  eyeBtn: {
+    position: "absolute",
+    right: "12px",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    padding: 0,
+  },
+  fieldError: {
+    color: "#ef4444",
+    fontSize: "12px",
+    margin: "4px 0 0 0",
+    textAlign: "left",
+    width: "100%",
+    maxWidth: "300px",
+  },
+  serverError: {
+    color: "#dc2626",
+    fontSize: "13px",
+    background: "rgba(254,226,226,0.85)",
+    border: "1px solid #fecaca",
+    borderRadius: "8px",
+    padding: "8px 12px",
+    marginTop: "10px",
+    textAlign: "left",
+    width: "100%",
+    maxWidth: "300px",
+    boxSizing: "border-box",
   },
   button: {
     background: "#4CAF50",
@@ -270,9 +293,18 @@ const styles = {
     cursor: "pointer",
     fontSize: "16px",
     marginTop: "20px",
+    transition: "opacity 0.2s",
+  },
+  spinner: {
+    display: "inline-block",
+    width: "14px",
+    height: "14px",
+    border: "2px solid rgba(255,255,255,0.35)",
+    borderTopColor: "#fff",
+    borderRadius: "50%",
+    animation: "__si_spin 0.7s linear infinite",
   },
   link: { color: "#4CAF50", textDecoration: "none" },
 };
-
 
 export default SignIn;

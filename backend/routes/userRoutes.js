@@ -9,7 +9,8 @@ const router = express.Router();
 
 const NAME_REGEX = /^[a-zA-Z\s'-]{2,50}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,72}$/;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,72}$/;
 
 const validateRegister = (data) => {
   const errors = [];
@@ -25,7 +26,7 @@ const validateRegister = (data) => {
 
   if (!data.password || !PASSWORD_REGEX.test(data.password))
     errors.push(
-      "Password must be 8–72 characters and include uppercase, lowercase, a number, and a special character (@$!%*?&)."
+      "Password must be 8–72 characters and include uppercase, lowercase, a number, and a special character (@$!%*?&).",
     );
 
   return errors;
@@ -85,7 +86,7 @@ router.post("/register", async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "7d", algorithm: "HS256" }
+      { expiresIn: "7d", algorithm: "HS256" },
     );
 
     return res.status(201).json({
@@ -125,7 +126,9 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email: sanitized.email }).select("+password");
+    const user = await User.findOne({ email: sanitized.email }).select(
+      "+password",
+    );
 
     // Use constant-time comparison even for non-existent users (prevents timing attacks)
     const dummyHash = "$2a$12$invalidsaltthatisexactly22chars..invalid";
@@ -142,7 +145,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "7d", algorithm: "HS256" }
+      { expiresIn: "7d", algorithm: "HS256" },
     );
 
     return res.status(200).json({
@@ -160,6 +163,47 @@ router.post("/login", async (req, res) => {
       success: false,
       message: "Something went wrong. Please try again later.",
     });
+  }
+});
+// ─── Reset Password ───────────────────────────────────────────────────────────
+router.post("/reset-password", async (req, res) => {
+  const email = req.body.email?.trim().toLowerCase().slice(0, 254);
+  const password = req.body.password?.trim().slice(0, 72);
+
+  if (!email || !EMAIL_REGEX.test(email))
+    return res
+      .status(422)
+      .json({ success: false, message: "Enter a valid email address." });
+
+  if (!password || !PASSWORD_REGEX.test(password))
+    return res.status(422).json({
+      success: false,
+      message:
+        "Password must be 8–72 characters and include uppercase, lowercase, a number, and a special character (@$!%*?&).",
+    });
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "No account found with this email." });
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Use updateOne instead of save() to avoid full schema validation
+    await User.updateOne({ email }, { $set: { password: hashedPassword } });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Password updated successfully." });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Something went wrong. Please try again.",
+      });
   }
 });
 

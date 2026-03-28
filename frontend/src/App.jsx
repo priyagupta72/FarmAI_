@@ -11,6 +11,7 @@ import FertilizerPage from './pages/FertilizerPage';
 import CropResult from './pages/CropResult';
 import FertilizerResult from './pages/FertilizerResult';
 // import Start from './pages/Start'; // Uncomment if you want Start page
+import ForgotPassword from "./pages/ForgotPassword";
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -56,6 +57,7 @@ const App = () => {
           <Route path="/crop-result" element={<CropResult />} />
           <Route path="/fertilizer-result" element={<FertilizerResult />} />
           <Route path="/login" element={<SignIn/>} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/register" element={<SignUp />} />
           <Route path="/" element={<HomeBeforeLogIn />} />
 
