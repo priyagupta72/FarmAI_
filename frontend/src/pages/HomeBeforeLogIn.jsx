@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Slider from "react-slick";
 import { FaLeaf, FaSeedling, FaHeartbeat, FaChevronDown } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -8,8 +7,6 @@ import ChatButton from "./ChatButton";
 import ChatPopup from "../components/ChatPopup";
 import LearnMorePopup from "./LearnMorePopup";
 
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -52,44 +49,44 @@ const Home = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  const sliderSettings = {
-    dots: true,
-    arrows: false,
-    infinite: true,
-    speed: 600,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    centerMode: true,
-    centerPadding: "24px",
-    responsive: [
-      { breakpoint: 1280, settings: { slidesToShow: 2, centerMode: true } },
-      { breakpoint: 1024, settings: { slidesToShow: 2, centerMode: false } },
-      { breakpoint: 768, settings: { slidesToShow: 1, centerMode: false } },
-    ],
-  };
+  // const sliderSettings = {
+  //   dots: true,
+  //   arrows: false,
+  //   infinite: true,
+  //   speed: 600,
+  //   autoplay: true,
+  //   autoplaySpeed: 4000,
+  //   slidesToShow: 3,
+  //   slidesToScroll: 1,
+  //   centerMode: true,
+  //   centerPadding: "24px",
+  //   responsive: [
+  //     { breakpoint: 1280, settings: { slidesToShow: 2, centerMode: true } },
+  //     { breakpoint: 1024, settings: { slidesToShow: 2, centerMode: false } },
+  //     { breakpoint: 768, settings: { slidesToShow: 1, centerMode: false } },
+  //   ],
+  // };
 
-  const testimonials = [
-    {
-      text: "FarmAI helped me pick the perfect crops for my farm. The insights were spot on.",
-      author: "John Doe",
-      role: "Farmer",
-      avatar: "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M="
-    },
-    {
-      text: "The fertilizer recommendations boosted my yield by ~30% this season!",
-      author: "Jane Smith",
-      role: "Agri-entrepreneur",
-      avatar: "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M="
-    },
-    {
-      text: "Disease alerts saved me from major crop loss. Super practical and fast.",
-      author: "Alex Johnson",
-      role: "Co-op Manager",
-      avatar: "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M="
-    }
-  ];
+  // const testimonials = [
+  //   {
+  //     text: "FarmAI helped me pick the perfect crops for my farm. The insights were spot on.",
+  //     author: "John Doe",
+  //     role: "Farmer",
+  //     avatar: "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M="
+  //   },
+  //   {
+  //     text: "The fertilizer recommendations boosted my yield by ~30% this season!",
+  //     author: "Jane Smith",
+  //     role: "Agri-entrepreneur",
+  //     avatar: "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M="
+  //   },
+  //   {
+  //     text: "Disease alerts saved me from major crop loss. Super practical and fast.",
+  //     author: "Alex Johnson",
+  //     role: "Co-op Manager",
+  //     avatar: "https://media.istockphoto.com/id/2212656822/vector/black-silhouette-of-a-gender-neutral-person-with-short-hair-representing-an-anonymous-user.jpg?s=612x612&w=0&k=20&c=-Lbk7ESJJQqDcXMZsIJJJPVoepWszWkG1JWLpuwYV9M="
+  //   }
+  // ];
 
   const faqs = [
     { q: "What is FarmAI?", a: "FarmAI is an AI-powered platform that helps with crop recommendations, fertilizer guidance, and disease detection." },
@@ -186,7 +183,7 @@ const Home = () => {
       </section>
 
       {/* =================== TESTIMONIALS =================== */}
-      <section id="reviews" className="snap-section py-16 sm:py-20 bg-green-50">
+      {/* <section id="reviews" className="snap-section py-16 sm:py-20 bg-green-50">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10">
           <motion.h3 initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }} className="text-3xl sm:text-4xl font-bold text-center mb-12">
             What Our Users Say
@@ -211,7 +208,7 @@ const Home = () => {
             </Slider>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* =================== FAQ =================== */}
       <section id="faq" className="snap-section py-20 bg-gradient-to-b from-white to-green-50">
