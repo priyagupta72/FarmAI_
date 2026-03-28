@@ -244,10 +244,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: "An unexpected error occurred." });
 });
 
-// ===== Serve React Build =====
-app.use(express.static(path.join(process.cwd(), "frontend/build")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(process.cwd(), "frontend/build", "index.html"));
+// ===== Health Check =====
+app.get("/", (req, res) => {
+  res.json({ status: "FarmAI backend is running" });
 });
 
 // ===== Start Server =====
